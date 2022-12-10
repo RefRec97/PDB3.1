@@ -29,14 +29,15 @@ class Update():
         hour = datetime.now().hour
         min = datetime.now().minute
 
-        #Run every 6 hours + (5 minute offset)
-        if hour%6 == 0 and min%5 == 0:
-            #check if already run this hour
-            if not self._done:
-                self._done = True
-                
-                #update evrything here
-                self._updateStats()
+        #Run every 6 hours 
+        if hour%6 == 0:
+            if min%5 == 0: #add+ (5 minute offset)
+                #check if already run this hour
+                if not self._done:
+                    self._done = True
+                    
+                    #update evrything here
+                    self._updateStats()
         else:
             self._done = False
 
