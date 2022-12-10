@@ -133,7 +133,6 @@ class Stats(interactions.Extension):
             label="Allianz",
             custom_id="btnShowAllianz")
 
-
         return (statsEmbed, statsBtn)
 
     def _formatNumber(self, number):
@@ -144,8 +143,7 @@ class Stats(interactions.Extension):
         data = self._db.getAllianzData(allianzName)
 
         if not data:
-            return False
-        allianzName = data[0][0]
+            return
 
         #Create Main content
         #Create max 5 Embed fields (if Possible)
@@ -154,8 +152,8 @@ class Stats(interactions.Extension):
             ebedFields.append(interactions.EmbedField(
                 inline=False,
                 name=player[1],
-                value=f"`{player[3]} - {self._formatNumber(player[4])}`"))
-        
+                value=f"`{player[2]} - {self._formatNumber(player[3])}`"))
+
         allianceEmbed = interactions.Embed(
             title=f"{allianzName}",
             description= f"Anzahl Mitglieder: {len(data)}\nTop Spieler:",
@@ -170,7 +168,7 @@ class Stats(interactions.Extension):
         allianceComponent = interactions.SelectMenu(
             custom_id="SoPlayerSelect",
             options = selectOptions)
-        
+
         return (allianceEmbed,allianceComponent)
 
 

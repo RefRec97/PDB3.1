@@ -6,7 +6,7 @@ import config
 
 class DB():
     def __init__(self):
-        self._conn = psycopg2.connect(host=config.dbHost, database=config.dbDatabase, user=config.dbUser, password=config.dbPassword)
+        self._conn = psycopg2.connect(host=config.dbHost, database=config.prodDatabase, user=config.dbUser, password=config.dbPassword)
         self._cur = self._conn.cursor()
 
     def _read(self, sql, data=None):
@@ -31,7 +31,7 @@ class DB():
     def _writePlayer(self, player:PlayerStats):
         sql = """INSERT INTO pdb3.player(
                     "playerId", "playerName", "playerUniverse", "playerGalaxy", "allianceId")
-                    VALUES (%s, %s, %s, %s, %s) on conflict ("playerId", "playerName") do nothing; """
+                    VALUES (%s, %s, %s, %s, %s) on conflict ("playerId", "playerName", "allianceId") do nothing; """
         self._write(sql,(player.playerId, player.playerName,player.playerUniverse,
                          player.playerGalaxy, player.allianceId))
 
@@ -78,16 +78,21 @@ class DB():
                     LIMIT 1;"""
 
         return self._readOne(sql,(userName,))
-    
-
+        
     def getAllianzData(self, allianzName:str):
-        sql = """ SELECT alliance."allianceName", player."playerName", player."playerId", stats."rank", stats."score", max(stats."timestamp") 
-                    FROM pdb3.alliance
-                    INNER JOIN pdb3.player ON player."allianceId" = alliance."allianceId"
-                    INNER JOIN pdb3.stats ON stats."playerId" = player."playerId"
-                    WHERE lower(alliance."allianceName")= lower(%s)
-                    GROUP BY player."playerName", alliance."allianceName",player."playerId", stats."rank", stats."score"
-                    ORDER BY stats."score" DESC"""
+        #rework SQL statements
+        sql = """ SELECT alliance."allianceName", player."playerName", stats."rank", stats."score"
+            FROM pdb3.alliance
+            INNER JOIN pdb3.player ON player."allianceId" = alliance."allianceId"
+                AND player."timestamp" BETWEEN now()::timestamp - interval '6 hours'
+                    AND now()::timestamp
+            INNER JOIN pdb3.stats ON stats."playerId" = player."playerId"
+                AND stats."timestamp" BETWEEN now()::timestamp - interval '6 hours'
+                    AND now()::timestamp
+            WHERE alliance."timestamp" BETWEEN now()::timestamp - interval '6 hours'
+                    AND now()::timestamp
+                AND lower(alliance."allianceName")= lower(%s)
+            ORDER BY stats."rank";"""
 
         return self._read(sql,(allianzName,))
 

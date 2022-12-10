@@ -12,11 +12,9 @@ CREATE TABLE IF NOT EXISTS pdb3.player
     "allianceId" integer,
     "timestamp" timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT player_pkey PRIMARY KEY ("dbKey"),
-    CONSTRAINT id_name_player_unique UNIQUE ("playerId", "playerName")
+    CONSTRAINT id_name_alli_player_unique UNIQUE ("playerId", "playerName", "allianceId")
 )
-WITH (
-    OIDS = FALSE
-)
+
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS pdb3.player
