@@ -162,7 +162,7 @@ class Stats(interactions.Extension):
             fields=ebedFields)
 
         selectOptions = []
-        for player in data:
+        for player in data[:25]: #max SelectionOptions possible (=25)
             selectOptions.append(interactions.SelectOption(
                 label=str(player[1]),
                 value=player[1]))
