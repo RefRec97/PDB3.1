@@ -31,7 +31,7 @@ class Update():
 
         #Run every 6 hours 
         if hour%6 == 0:
-            if min%5 == 0: #add+ (5 minute offset)
+            if min == 5 : #add+ (5 minute offset)
                 #check if already run this hour
                 if not self._done:
                     self._done = True

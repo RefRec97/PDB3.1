@@ -155,7 +155,7 @@ class Stats(interactions.Extension):
                 value=f"`{player[2]} - {self._formatNumber(player[3])}`"))
 
         allianceEmbed = interactions.Embed(
-            title=f"{allianzName}",
+            title=f"{player[0][0]}",
             description= f"Anzahl Mitglieder: {len(data)}\nTop Spieler:",
             fields=ebedFields)
 
