@@ -27,9 +27,10 @@ class Update():
             threading.Timer(1, self._clock).start()
 
         hour = datetime.now().hour
+        min = datetime.now().minute
 
-        #check if 6 hours passed
-        if hour%6 == 0:
+        #Run every 6 hours + (5 minute offset)
+        if hour%6 == 0 and min%5 == 0:
             #check if already run this hour
             if not self._done:
                 self._done = True
