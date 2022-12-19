@@ -45,7 +45,7 @@ class Planet(interactions.Extension):
             return
 
         #get userId
-        userId = self._db.getuserId(username)[1]
+        userId = self._db.getPlayerData(username)[1]
 
         #save planet
         self._db.updatePlanet(userId, galaxy, system, position)
@@ -93,7 +93,7 @@ class Planet(interactions.Extension):
             return
 
         #get userId
-        userId = self._db.getuserId(username)[1]
+        userId = self._db.getPlayerData(username)[1]
 
         #check if planet exists
         userPlanets = self._db.getUserPlanets(userId)

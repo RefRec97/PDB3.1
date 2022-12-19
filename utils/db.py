@@ -74,24 +74,30 @@ class DB():
             return self._readOne(sql,(userID,))[0]
         except:
             return -1
-
-    def getUserData(self, userName:str):
-        sql = """ SELECT player."playerName", alliance."allianceName", alliance."allianceId", stats.* FROM public.player
-                    INNER JOIN public.stats ON stats."playerId" = player."playerId"
-                    INNER JOIN public.alliance ON alliance."allianceId" = player."allianceId"
-                    WHERE lower(player."playerName")=lower(%s)
-                    ORDER BY stats."timestamp" DESC
-                    LIMIT 1;"""
-
-        return self._readOne(sql,(userName,))
     
-    def getUserPlanets(self, userId:str):
+    def getPlayerStats(self, playerId:str):
+        sql = """SELECT * from public."stats"
+            where stats."playerId" = %s
+            ORDER BY stats."timestamp" DESC
+            LIMIT 1;"""
+
+        return self._readOne(sql,(playerId,))
+    
+    def getAllianceData(self, allianceId:str):
+        sql = """SELECT * from public."alliance"
+            where alliance."allianceId" = %s
+            ORDER BY alliance."timestamp" DESC
+            LIMIT 1;"""
+
+        return self._readOne(sql,(allianceId,))
+    
+    def getUserPlanets(self, playerId:str):
         sql = """SELECT * FROM public.planet
 	        WHERE planet."playerId" = %s"""
 
-        return self._read(sql,(userId,))
+        return self._read(sql,(playerId,))
 
-    def getuserId(self, userName:str):
+    def getPlayerData(self, userName:str):
         sql = """ SELECT * FROM public.player
             WHERE lower(player."playerName")=lower(%s)
             ORDER BY player."timestamp" DESC
@@ -99,21 +105,21 @@ class DB():
 
         return self._readOne(sql,(userName,))
 
-    def updatePlanet(self, userId:str, galaxy:int, system:int, position:int):
+    def updatePlanet(self, playerId:str, galaxy:int, system:int, position:int):
         sql = """INSERT INTO public.planet(
             "playerId", "galaxy", "system", "position", "moon", "sensorPhalanx")
             VALUES ( %s, %s, %s, %s, %s, %s) 
             on conflict ("galaxy", "system", "position") DO UPDATE 
             SET "playerId" = excluded."playerId" ;"""
         
-        self._write(sql,(userId, galaxy, system, position, False , 0 ))
+        self._write(sql,(playerId, galaxy, system, position, False , 0 ))
 
-    def delPlanet(self, userId:str, galaxy:int, system:int, position:int):
+    def delPlanet(self, playerId:str, galaxy:int, system:int, position:int):
         sql = """DELETE FROM public.planet
             WHERE planet."playerId" = %s AND
                 planet."galaxy" = %s AND
                 planet."system" = %s AND
                 planet."position" = %s;"""
 
-        self._write(sql,(userId, galaxy, system, position))
+        self._write(sql,(playerId, galaxy, system, position))
 

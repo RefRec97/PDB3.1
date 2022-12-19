@@ -34,50 +34,53 @@ class Stats(interactions.Extension):
         await ctx.send(embeds=statsEmbed, components=statsComponent)
 
     def _getStatsContent(self, playerName:str):
-        data = self._db.getUserData(playerName)
 
-        if not data:
+        playerData = self._db.getPlayerData(playerName)
+        if not playerData:
             return False
+        
+        playerStats = self._db.getPlayerStats(playerData[1])
+        allianceData = self._db.getAllianceData(playerData[5])
 
         #Embed Fields
         statsFields = [
             interactions.EmbedField(
                 inline=False,
                 name="Gesamt",
-                value=f"`{data[4]:4} - {self._formatNumber(data[5])}`"
+                value=f"`{playerStats[1]:4} - {self._formatNumber(playerStats[2])}`"
             ),
             interactions.EmbedField(
                 inline=False,
                 name="Gebäude",
-                value=f"`{data[8]:4} - {self._formatNumber(data[9])}`"
+                value=f"`{playerStats[5]:4} - {self._formatNumber(playerStats[6])}`"
             ),
             interactions.EmbedField(
                 inline=False,
                 name="Forschung",
-                value=f"`{data[6]:4} - {self._formatNumber(data[7])}`"
+                value=f"`{playerStats[3]:4} - {self._formatNumber(playerStats[4])}`"
             ),
             interactions.EmbedField(
                 inline=False,
                 name="Flotte",
-                value=f"`{data[12]:4} - {self._formatNumber(data[13])}`"
+                value=f"`{playerStats[9]:4} - {self._formatNumber(playerStats[10])}`"
             ),
             interactions.EmbedField(
                 inline=False,
                 name="Verteidigung",
-                value=f"`{data[10]:4} - {self._formatNumber(data[11])}`"
+                value=f"`{playerStats[7]:4} - {self._formatNumber(playerStats[8])}`"
             )
         ]
 
         #Add Planet Data
-        planetData = self._db.getUserPlanets(data[21]) #21 -> playerId
+        planetData = self._db.getUserPlanets(playerData[1])
         statsFields += self._getPlanetEmbeds(planetData)
 
         #Create Embed
         statsEmbed = interactions.Embed(
-            title=f"{data[0]}",
-            description= f"{data[21]}\n{data[1]}", #PlayerId and Alliance Name
+            title=f"{playerData[2]}",
+            description= f"{playerData[1]}\n{allianceData[2]}", #PlayerId and Alliance Name
             fields = statsFields,
-            timestamp=data[22]
+            timestamp=playerStats[19]
         )
 
         statsComponent = interactions.Button(
