@@ -31,7 +31,7 @@ class Stats(interactions.Extension):
             await ctx.send(f"{username} nicht gefunden")
             return
         
-        await ctx.send(embeds=statsEmbed, components= statsComponent)
+        await ctx.send(embeds=statsEmbed, components=statsComponent)
 
     def _getStatsContent(self, playerName:str):
         data = self._db.getUserData(playerName)
@@ -39,6 +39,7 @@ class Stats(interactions.Extension):
         if not data:
             return False
 
+        #Embed Fields
         statsFields = [
             interactions.EmbedField(
                 inline=False,
@@ -71,18 +72,81 @@ class Stats(interactions.Extension):
         planetData = self._db.getUserPlanets(data[21]) #21 -> playerId
         statsFields += self._getPlanetEmbeds(planetData)
 
-        #create 
+        #Create Embed
         statsEmbed = interactions.Embed(
             title=f"{data[0]}",
-            description= f"{data[1]}",
+            description= f"{data[21]}\n{data[1]}", #PlayerId and Alliance Name
             fields = statsFields,
             timestamp=data[22]
         )
 
-        return (statsEmbed, None)
+        statsComponent = interactions.Button(
+            style=interactions.ButtonStyle.PRIMARY,
+            label='Planet Hinzufügen',
+            custom_id='btn_planet'
+        )
+        return (statsEmbed, statsComponent)
+
+    #Planet Modal
+    @interactions.extension_component("btn_planet")
+    async def modal_planet(self, ctx:interactions.ComponentContext):        
+        if not self._auth.check(ctx.user.id, "planet"):
+            return
+        
+        planetModal = interactions.Modal(
+            title="Planet Hinzufügen",
+            custom_id="modal_planet",
+            components=[
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Galaxy",
+                    custom_id='planet_gal',
+                    placeholder='1-4',
+                    required=True,
+                    min_length=1,
+                    max_length=1,
+                ),
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="System",
+                    custom_id='planet_sys',
+                    placeholder='1-200',
+                    required=True,
+                    min_length=1,
+                    max_length=3
+                ),
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Galaxy",
+                    custom_id='planet_pos',
+                    placeholder='1-15',
+                    required=True,
+                    min_length=1,
+                    max_length=2
+                )
+            ]
+        )
+        await ctx.popup(planetModal)
+
+    #Confirm Planet Modal
+    @interactions.extension_modal("modal_planet")
+    async def modal_planet_save(self, ctx:interactions.ComponentContext, galaxy:str, system:str, position:str):
+        if not self._auth.check(ctx.user.id, "planet"):
+            return
+
+        #Workaround get PlayerId from Description
+        playerId = ctx.message.embeds[0].description.split('\n')[0] 
+
+        self._db.updatePlanet(playerId, galaxy ,system, position)
+
+        planetEmbed = interactions.Embed(
+            title="Gespeichert",
+            description= f"{galaxy}:{system}:{position}",
+        )
+
+        await ctx.send(embeds=planetEmbed)
 
     def _getPlanetEmbeds(self, planetData):
-        
         planetEmbeds = []
         for planet in planetData:
             planetEmbeds.append( interactions.EmbedField(
@@ -92,7 +156,6 @@ class Stats(interactions.Extension):
             ))
         
         return planetEmbeds
-
 
     def _formatNumber(self, number):
         return f"{number:,}".replace(",",".")
