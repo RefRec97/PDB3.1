@@ -1,8 +1,8 @@
--- Table: pdb3.player
+-- Table: public.player
 
--- DROP TABLE IF EXISTS pdb3.player;
+-- DROP TABLE IF EXISTS public.player;
 
-CREATE TABLE IF NOT EXISTS pdb3.player
+CREATE TABLE IF NOT EXISTS public.player
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "playerId" integer NOT NULL,
@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS pdb3.player
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS pdb3.player
-    OWNER to pi;
+ALTER TABLE IF EXISTS public.player
+    OWNER to poll;

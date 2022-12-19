@@ -1,8 +1,8 @@
--- Table: pdb3.stats
+-- Table: public.stats
 
--- DROP TABLE IF EXISTS pdb3.stats;
+-- DROP TABLE IF EXISTS public.stats;
 
-CREATE TABLE IF NOT EXISTS pdb3.stats
+CREATE TABLE IF NOT EXISTS public.stats
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     rank integer,
@@ -31,5 +31,5 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS pdb3.stats
-    OWNER to pi;
+ALTER TABLE IF EXISTS public.stats
+    OWNER to poll;

@@ -1,8 +1,8 @@
--- Table: pdb3.planet
+-- Table: public.planet
 
--- DROP TABLE IF EXISTS pdb3.planet;
+-- DROP TABLE IF EXISTS public.planet;
 
-CREATE TABLE IF NOT EXISTS pdb3.planet
+CREATE TABLE IF NOT EXISTS public.planet
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "playerId" integer,
@@ -18,5 +18,5 @@ CREATE TABLE IF NOT EXISTS pdb3.planet
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS pdb3.planet
-    OWNER to pi;
+ALTER TABLE IF EXISTS public.planet
+    OWNER to poll;

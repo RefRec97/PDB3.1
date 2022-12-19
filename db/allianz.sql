@@ -1,8 +1,8 @@
--- Table: pdb3.alliance
+-- Table: public.alliance
 
--- DROP TABLE IF EXISTS pdb3.alliance;
+-- DROP TABLE IF EXISTS public.alliance;
 
-CREATE TABLE IF NOT EXISTS pdb3.alliance
+CREATE TABLE IF NOT EXISTS public.alliance
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "allianceId" integer,
@@ -16,5 +16,5 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS pdb3.alliance
-    OWNER to pi;
+ALTER TABLE IF EXISTS public.alliance
+    OWNER to poll;

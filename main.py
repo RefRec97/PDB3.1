@@ -8,12 +8,12 @@ import config
 
 def main():
     #Utils
-    db = DB(config.prodDatabase)
+    db = DB(prod = True)
     update = Update(db)
     authroization = Authorization(db)
     
     #Create Bot
-    client = interactions.Client(token=config.prodToken)
+    client = interactions.Client(token=config.devToken)
 
     #Load Commands
     client.load("commands.utils", args=(authroization, update))

@@ -5,8 +5,12 @@ import config
 
 
 class DB():
-    def __init__(self, db):
-        self._conn = psycopg2.connect(host=config.dbHost, database=db, user=config.dbUser, password=config.dbPassword)
+    def __init__(self, prod):
+        if prod:
+            self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword)
+        else:
+            self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword)
+        
         self._cur = self._conn.cursor()
 
     def _read(self, sql, data=None):
@@ -29,21 +33,21 @@ class DB():
             self._writeStats(player)
         
     def _writePlayer(self, player:PlayerStats):
-        sql = """INSERT INTO pdb3.player(
+        sql = """INSERT INTO public.player(
                     "playerId", "playerName", "playerUniverse", "playerGalaxy", "allianceId")
                     VALUES (%s, %s, %s, %s, %s) on conflict ("playerId", "playerName", "allianceId") do nothing; """
         self._write(sql,(player.playerId, player.playerName,player.playerUniverse,
                          player.playerGalaxy, player.allianceId))
 
     def _writeAllianz(self, player:PlayerStats):
-        sql = """INSERT INTO pdb3.alliance(
+        sql = """INSERT INTO public.alliance(
                     "allianceId", "allianceName")
                     VALUES (%s, %s) on conflict ("allianceId", "allianceName") do nothing; """
         
         self._write(sql,(player.allianceId, player.allianceName))
 
     def _writeStats(self, player:PlayerStats):
-        sql = """INSERT INTO pdb3.stats(
+        sql = """INSERT INTO public.stats(
                     "rank", "score", "researchRank", "researchScore", "buildingRank", "buildingScore",
                     "defensiveRank", "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost",
                     "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId")
@@ -56,7 +60,7 @@ class DB():
                          player.playerId))
 
     def addAuthorization(self, userId:str , role:int):
-        sql = """INSERT INTO pdb3.authorization(
+        sql = """INSERT INTO public.authorization(
                     "userId", "roleId")
                     VALUES (%s, %s) ON CONFLICT ("userId") DO UPDATE
                         SET "roleId" = excluded."roleId";"""
@@ -64,7 +68,7 @@ class DB():
         self._write(sql,(userId, role))
 
     def getAuthRole(self, userID:str):
-        sql = """ SELECT "roleId" FROM pdb3.authorization
+        sql = """ SELECT "roleId" FROM public.authorization
 	                WHERE "userId" = %s;"""
 
         try:
@@ -73,9 +77,9 @@ class DB():
             return -1
 
     def getUserData(self, userName:str):
-        sql = """ SELECT player."playerName", alliance."allianceName", alliance."allianceId", stats.* FROM pdb3.player
-                    INNER JOIN pdb3.stats ON stats."playerId" = player."playerId"
-                    INNER JOIN pdb3.alliance ON alliance."allianceId" = player."allianceId"
+        sql = """ SELECT player."playerName", alliance."allianceName", alliance."allianceId", stats.* FROM public.player
+                    INNER JOIN public.stats ON stats."playerId" = player."playerId"
+                    INNER JOIN public.alliance ON alliance."allianceId" = player."allianceId"
                     WHERE lower(player."playerName")=lower(%s)
                     ORDER BY stats."timestamp" DESC
                     LIMIT 1;"""
@@ -83,13 +87,13 @@ class DB():
         return self._readOne(sql,(userName,))
     
     def getUserPlanets(self, userId:str):
-        sql = """SELECT * FROM pdb3.planet
+        sql = """SELECT * FROM public.planet
 	        WHERE planet."playerId" = %s"""
 
         return self._read(sql,(userId,))
 
     def getuserId(self, userName:str):
-        sql = """ SELECT * FROM pdb3.player
+        sql = """ SELECT * FROM public.player
             WHERE lower(player."playerName")=lower(%s)
             ORDER BY player."timestamp" DESC
             LIMIT 1;"""
@@ -97,7 +101,7 @@ class DB():
         return self._readOne(sql,(userName,))
 
     def updatePlanet(self, userId:str, galaxy:int, system:int, position:int):
-        sql = """INSERT INTO pdb3.planet(
+        sql = """INSERT INTO public.planet(
             "playerId", "galaxy", "system", "position", "moon", "sensorPhalanx")
             VALUES ( %s, %s, %s, %s, %s, %s) 
             on conflict ("galaxy", "system", "position") DO UPDATE 
@@ -106,7 +110,7 @@ class DB():
         self._write(sql,(userId, galaxy, system, position, False , 0 ))
 
     def delPlanet(self, userId:str, galaxy:int, system:int, position:int):
-        sql = """DELETE FROM pdb3.planet
+        sql = """DELETE FROM public.planet
             WHERE planet."playerId" = %s AND
                 planet."galaxy" = %s AND
                 planet."system" = %s AND

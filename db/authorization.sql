@@ -1,8 +1,8 @@
--- Table: pdb3.authorization
+-- Table: public.authorization
 
--- DROP TABLE IF EXISTS pdb3."authorization";
+-- DROP TABLE IF EXISTS public."authorization";
 
-CREATE TABLE IF NOT EXISTS pdb3."authorization"
+CREATE TABLE IF NOT EXISTS public."authorization"
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "userId" text COLLATE pg_catalog."default" NOT NULL,
@@ -15,5 +15,5 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS pdb3."authorization"
-    OWNER to pi;
+ALTER TABLE IF EXISTS public."authorization"
+    OWNER to poll;
