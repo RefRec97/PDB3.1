@@ -23,9 +23,11 @@ class Auth(interactions.Extension):
                 required=True
             ),
         ],
+        scope=config.devDiscordId
     )
     async def admin(self, ctx: interactions.CommandContext, user:interactions.User):
         if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
         self._auth.add(user.id, self._auth.ADMIN)
@@ -44,9 +46,11 @@ class Auth(interactions.Extension):
                 required=True
             ),
         ],
+        scope=config.devDiscordId
     )
     async def auth(self, ctx: interactions.CommandContext, user:interactions.User):
         if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
         self._auth.add(user.id, self._auth.USER)
@@ -60,10 +64,11 @@ class Auth(interactions.Extension):
     )
     async def authContext(self, ctx: interactions.CommandContext):
         if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
-        
-        self._auth.add(ctx.user.id, self._auth.USER)
-        await ctx.send("User authorisiert: " + ctx.user.mention)
+
+        self._auth.add(ctx.target.user.id, self._auth.USER)
+        await ctx.send("User authorisiert: " + ctx.target.user.mention)
         
     
 

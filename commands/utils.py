@@ -1,6 +1,7 @@
 import interactions
 from utils.authorisation import Authorization
 from utils.update import Update
+import config
 
 class Bot(interactions.Extension):
     def __init__(self, client, args):
@@ -10,10 +11,13 @@ class Bot(interactions.Extension):
 
     @interactions.extension_command(
         name="shutdown",
-        description="Schaltet den Bot aus"
+        description="Schaltet den Bot aus",
+        scope=config.devDiscordId
+
     )
     async def shutdown(self, ctx: interactions.CommandContext):
         if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
         self._update.stop()
@@ -22,11 +26,13 @@ class Bot(interactions.Extension):
 
     @interactions.extension_command(
         name="update",
-        description="Startet Aktualisierung der stats"
+        description="Startet Aktualisierung der stats",
+        scope=config.devDiscordId
     )
     @interactions.autodefer(delay=60)
     async def update(self, ctx: interactions.CommandContext):
         if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
         await ctx.send("Starte Update")
@@ -39,6 +45,7 @@ class Bot(interactions.Extension):
     )
     async def status(self, ctx: interactions.CommandContext):
         if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         await ctx.send("Online auf {} Server".format(len(self._client.guilds)))
     

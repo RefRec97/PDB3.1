@@ -5,8 +5,8 @@ import config
 
 
 class DB():
-    def __init__(self):
-        self._conn = psycopg2.connect(host=config.dbHost, database=config.prodDatabase, user=config.dbUser, password=config.dbPassword)
+    def __init__(self, db):
+        self._conn = psycopg2.connect(host=config.dbHost, database=db, user=config.dbUser, password=config.dbPassword)
         self._cur = self._conn.cursor()
 
     def _read(self, sql, data=None):
@@ -67,7 +67,10 @@ class DB():
         sql = """ SELECT "roleId" FROM pdb3.authorization
 	                WHERE "userId" = %s;"""
 
-        return self._readOne(sql,(userID,))[0]
+        try:
+            return self._readOne(sql,(userID,))[0]
+        except:
+            return -1
 
     def getUserData(self, userName:str):
         sql = """ SELECT player."playerName", alliance."allianceName", alliance."allianceId", stats.* FROM pdb3.player
@@ -78,26 +81,27 @@ class DB():
                     LIMIT 1;"""
 
         return self._readOne(sql,(userName,))
+    
+    def getUserPlanets(self, userId:str):
+        sql = """SELECT * FROM pdb3.planet
+	        WHERE planet."playerId" = %s"""
+
+        return self._read(sql,(userId,))
+
+    def getuserId(self, userName:str):
+        sql = """ SELECT * FROM pdb3.player
+            WHERE lower(player."playerName")=lower(%s)
+            ORDER BY player."timestamp" DESC
+            LIMIT 1;"""
+
+        return self._readOne(sql,(userName,))
+
+    def updatePlanet(self, userId:str, galaxy:int, system:int, position:int):
+        sql = """INSERT INTO pdb3.planet(
+            "playerId", "galaxy", "system", "position", "moon", "sensorPhalanx")
+            VALUES ( %s, %s, %s, %s, %s, %s) 
+            on conflict ("galaxy", "system", "position") DO UPDATE 
+            SET "playerId" = excluded."playerId" ;"""
         
-    def getAllianzData(self, allianzName:str):
-        #rework SQL statements
-        sql = """ SELECT alliance."allianceName", player."playerName", stats."rank", stats."score"
-            FROM pdb3.alliance
-            INNER JOIN pdb3.player ON player."allianceId" = alliance."allianceId"
-                AND player."timestamp" BETWEEN now()::timestamp - interval '6 hours'
-                    AND now()::timestamp
-            INNER JOIN pdb3.stats ON stats."playerId" = player."playerId"
-                AND stats."timestamp" BETWEEN now()::timestamp - interval '6 hours'
-                    AND now()::timestamp
-            WHERE alliance."timestamp" BETWEEN now()::timestamp - interval '6 hours'
-                    AND now()::timestamp
-                AND lower(alliance."allianceName")= lower(%s)
-            ORDER BY stats."rank";"""
+        self._write(sql,(userId, galaxy, system, position, False , 0 ))
 
-        return self._read(sql,(allianzName,))
-
-    def getAllAllianceNames(self):
-        sql = """ SELECT alliance."allianceName"
-                    FROM pdb3.alliance; """
-
-        return self._read(sql)

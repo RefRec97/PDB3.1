@@ -8,7 +8,7 @@ import config
 
 def main():
     #Utils
-    db = DB()
+    db = DB(config.prodDatabase)
     update = Update(db)
     authroization = Authorization(db)
     
@@ -19,6 +19,7 @@ def main():
     client.load("commands.utils", args=(authroization, update))
     client.load("commands.auth", args=(authroization))
     client.load("commands.stats", args=(authroization, db))
+    client.load("commands.planet", args=(authroization, db))
 
 
     #Start Bot
