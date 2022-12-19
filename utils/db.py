@@ -105,3 +105,12 @@ class DB():
         
         self._write(sql,(userId, galaxy, system, position, False , 0 ))
 
+    def delPlanet(self, userId:str, galaxy:int, system:int, position:int):
+        sql = """DELETE FROM pdb3.planet
+            WHERE planet."playerId" = %s AND
+                planet."galaxy" = %s AND
+                planet."system" = %s AND
+                planet."position" = %s;"""
+
+        self._write(sql,(userId, galaxy, system, position))
+
