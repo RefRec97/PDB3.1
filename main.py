@@ -13,7 +13,7 @@ def main():
     authroization = Authorization(db)
     
     #Create Bot
-    client = interactions.Client(token=config.devToken)
+    client = interactions.Client(token=config.prodToken)
 
     #Load Commands
     client.load("commands.utils", args=(authroization, update))
