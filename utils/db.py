@@ -33,8 +33,15 @@ class DB():
         return data
 
     def _write(self, sql, data):
-        self._cur.execute(sql,data)
-        self._conn.commit()
+
+        try:
+            self._cur.execute(sql,data)
+            self._conn.commit()
+        except Exception as e:
+            
+            #Reconecct and try again
+            self._cur.execute(sql,data)
+            self._conn.commit()
 
     def writeStats(self, players:list):
         #ToDo: performance

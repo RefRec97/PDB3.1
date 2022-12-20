@@ -45,29 +45,19 @@ class Stats(interactions.Extension):
         #Embed Fields
         statsFields = [
             interactions.EmbedField(
-                inline=False,
-                name="Gesamt",
-                value=f"`{playerStats[1]:4} - {self._formatNumber(playerStats[2])}`"
+                inline=True,
+                name="Type",
+                value="Gesamt\nGebäude\nForschung\nFlotte\nVerteidigung\n"
             ),
             interactions.EmbedField(
-                inline=False,
-                name="Gebäude",
-                value=f"`{playerStats[5]:4} - {self._formatNumber(playerStats[6])}`"
+                inline=True,
+                name="Rang",
+                value=f"{playerStats[1]}\n{playerStats[5]}\n{playerStats[3]}\n{playerStats[9]}\n{playerStats[7]}\n"
             ),
             interactions.EmbedField(
-                inline=False,
-                name="Forschung",
-                value=f"`{playerStats[3]:4} - {self._formatNumber(playerStats[4])}`"
-            ),
-            interactions.EmbedField(
-                inline=False,
-                name="Flotte",
-                value=f"`{playerStats[9]:4} - {self._formatNumber(playerStats[10])}`"
-            ),
-            interactions.EmbedField(
-                inline=False,
-                name="Verteidigung",
-                value=f"`{playerStats[7]:4} - {self._formatNumber(playerStats[8])}`"
+                inline=True,
+                name="Punkte",
+                value=f"{playerStats[2]}\n{playerStats[6]}\n{playerStats[4]}\n{playerStats[10]}\n{playerStats[8]}\n"
             )
         ]
 
@@ -113,14 +103,14 @@ class Stats(interactions.Extension):
                     style=interactions.TextStyleType.SHORT,
                     label="System",
                     custom_id='planet_sys',
-                    placeholder='1-200',
+                    placeholder='1-400',
                     required=True,
                     min_length=1,
                     max_length=3
                 ),
                 interactions.TextInput(
                     style=interactions.TextStyleType.SHORT,
-                    label="Galaxy",
+                    label="Position",
                     custom_id='planet_pos',
                     placeholder='1-15',
                     required=True,
@@ -150,19 +140,33 @@ class Stats(interactions.Extension):
         await ctx.send(embeds=planetEmbed)
 
     def _getPlanetEmbeds(self, planetData):
-        planetEmbeds = []
+        planetEmbeds = [
+            interactions.EmbedField(
+                name="Position",
+                value="",
+                inline=True
+            ),
+            interactions.EmbedField(
+                name="Mond",
+                value="",
+                inline=True
+            ),
+            interactions.EmbedField(
+                name="Sensor Phalanx",
+                value="",
+                inline=True
+            ),
+        ]
+
         for planet in planetData:
-            planetEmbeds.append( interactions.EmbedField(
-                name=f"{planet[2]}:{planet[3]}:{planet[4]}",
-                inline=True,
-                value='-'
-            ))
+            planetEmbeds[0].value += f"{planet[2]}:{planet[3]}:{planet[4]}\n"
+            planetEmbeds[1].value += f"-\n" #WIP
+            planetEmbeds[2].value += f"-\n" #WIP
         
         return planetEmbeds
 
     def _formatNumber(self, number):
         return f"{number:,}".replace(",",".")
-    
 
 def setup(client, args):
     Stats(client, args)
