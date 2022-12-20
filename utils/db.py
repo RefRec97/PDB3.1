@@ -2,11 +2,13 @@ import psycopg2
 from utils.player import PlayerStats
 import config
 
-
-
 class DB():
     def __init__(self, prod):
-        if prod:
+        self._prod = prod
+        self._connect()
+
+    def _connect(self):
+        if self._prod:
             self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword, port=config.pordDbPort)
         else:
             self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword, port=config.devDbPort)
@@ -17,20 +19,30 @@ class DB():
         return self._cur.fetchall()
     
     def _readOne(self, sql, data):
-        self._cur.execute(sql,data)
-        return self._cur.fetchone()
+
+        try:
+            self._cur.execute(sql,data)
+            data = self._cur.fetchone()
+        except Exception as e:
+            
+            #Reconecct and try again
+            self._connect()
+            self._cur.execute(sql,data)
+            data = self._cur.fetchone()
+
+        return data
 
     def _write(self, sql, data):
         self._cur.execute(sql,data)
         self._conn.commit()
-        
+
     def writeStats(self, players:list):
         #ToDo: performance
         for player in players:
             self._writePlayer(player)
             self._writeAllianz(player)
             self._writeStats(player)
-        
+
     def _writePlayer(self, player:PlayerStats):
         sql = """INSERT INTO public.player(
                     "playerId", "playerName", "playerUniverse", "playerGalaxy", "allianceId")
@@ -74,7 +86,7 @@ class DB():
             return self._readOne(sql,(userID,))[0]
         except:
             return -1
-    
+
     def getPlayerStats(self, playerId:str):
         sql = """SELECT * from public."stats"
             where stats."playerId" = %s
@@ -82,7 +94,7 @@ class DB():
             LIMIT 1;"""
 
         return self._readOne(sql,(playerId,))
-    
+
     def getAllianceData(self, allianceId:str):
         sql = """SELECT * from public."alliance"
             where alliance."allianceId" = %s
@@ -90,7 +102,7 @@ class DB():
             LIMIT 1;"""
 
         return self._readOne(sql,(allianceId,))
-    
+
     def getUserPlanets(self, playerId:str):
         sql = """SELECT * FROM public.planet
 	        WHERE planet."playerId" = %s"""
