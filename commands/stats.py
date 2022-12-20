@@ -34,7 +34,7 @@ class Stats(interactions.Extension):
         await ctx.send(embeds=statsEmbed, components=statsComponent)
 
     def _getStatsContent(self, playerName:str):
-
+        
         playerData = self._db.getPlayerData(playerName)
         if not playerData:
             return False
@@ -163,6 +163,11 @@ class Stats(interactions.Extension):
             planetEmbeds[1].value += f"-\n" #WIP
             planetEmbeds[2].value += f"-\n" #WIP
         
+        if not planetData:
+            planetEmbeds[0].value = "-"
+            planetEmbeds[1].value = "-"
+            planetEmbeds[2].value = "-"
+
         return planetEmbeds
 
     def _formatNumber(self, number):
