@@ -1,10 +1,14 @@
 import interactions
+import logging
 from utils.authorisation import Authorization
 from utils.update import Update
 import config
 
 class Bot(interactions.Extension):
     def __init__(self, client, args):
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("Initialization")
+
         self._client: interactions.Client = client
         self._auth:Authorization = args[0]
         self._update:Update = args[1]
@@ -16,6 +20,8 @@ class Bot(interactions.Extension):
 
     )
     async def shutdown(self, ctx: interactions.CommandContext):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
@@ -31,6 +37,8 @@ class Bot(interactions.Extension):
     )
     @interactions.autodefer(delay=60)
     async def update(self, ctx: interactions.CommandContext):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
@@ -44,6 +52,8 @@ class Bot(interactions.Extension):
         description="Status des Bots"
     )
     async def status(self, ctx: interactions.CommandContext):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return

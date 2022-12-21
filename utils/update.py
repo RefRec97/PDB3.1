@@ -1,5 +1,6 @@
 from datetime import datetime
 import threading
+import logging
 
 import urllib.request, json 
 from utils.player import PlayerStats
@@ -7,6 +8,9 @@ from utils.db import DB
 
 class Update():
     def __init__(self, db:DB):
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("Initialization")
+
         self._db:DB = db
         self._running = True
         self._done = False
@@ -22,9 +26,10 @@ class Update():
         self._updateStats()
 
     def _clock(self):
+        self._logger.debug("Clock Tick")
         if self._running:
-            #Runs every second
-            threading.Timer(1, self._clock).start()
+            #Runs every 10 second
+            threading.Timer(10, self._clock).start()
 
         hour = datetime.now().hour
         min = datetime.now().minute
@@ -34,6 +39,7 @@ class Update():
             if min == 5 : #add+ (5 minute offset)
                 #check if already run this hour
                 if not self._done:
+                    self._logger.debug("Update timeslot start: %s:%s",hour,min)
                     self._done = True
                     
                     #update evrything here
@@ -43,7 +49,7 @@ class Update():
 
     
     def _updateStats(self):
-        print("Updating")
+        self._logger.info("Starting Update")
         players = []
         with urllib.request.urlopen("https://pr0game.com/stats_Universe_2.json") as url:
             statsData = json.loads(url.read().decode("utf-8"))
@@ -61,7 +67,7 @@ class Update():
 
         self._db.writeStats(players)
         
-        print("Update complete")
+        self._logger.info("Update complete")
         
 
 

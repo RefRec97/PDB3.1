@@ -1,38 +1,88 @@
 import psycopg2
+import logging
 from utils.player import PlayerStats
 import config
 
 class DB():
-    def __init__(self, prod):
+    def __init__(self, prod:bool):
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("Initialization in productive Environment: %s",str(prod))
+
         self._prod = prod
         self._connect()
 
     def _connect(self):
         if self._prod:
-            self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword, port=config.pordDbPort)
+            try:
+                self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword, port=config.pordDbPort)
+                self._logger.debug("DB connected")
+            except psycopg2.Error as e:
+                self._logger.critical("DB connection failed")
+                self._logger.critical(e)
         else:
-            self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword, port=config.devDbPort)
+            try:
+                self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword, port=config.devDbPort)
+                self._logger.debug("DB connected")
+            except psycopg2.Error as e:
+                self._logger.critical("DB connection failed")
+                self._logger.critical(e)
+        
         self._cur = self._conn.cursor()
 
     def _read(self, sql, data=None):
-        self._cur.execute(sql,data)
-        return self._cur.fetchall()
-    
+        self._logger.debug("Read from Db")
+        self._logger.debug(sql)
+        self._logger.debug(data)
+
+        try:
+            self._cur.execute(sql,data)
+            data = self._cur.fetchall()
+        except psycopg2.Error as e:
+            self._logger.warning("Failed to Read")
+            self._logger.warning(e)
+
+            #Reconecct and try again
+            self._logger.debug("Retrying read operation")
+            try:
+                self._connect()
+                self._cur.execute(sql,data)
+                data = self._cur.fetchall()
+            except psycopg2.Error as e:
+                self._logger.critical("Retry Read Failed")
+                self._logger.critical(e)
+        
+        self._logger.debug("data read: %s", data)
+        return data
+
     def _readOne(self, sql, data):
+        self._logger.debug("Read one from Db")
+        self._logger.debug(sql)
+        self._logger.debug(data)
 
         try:
             self._cur.execute(sql,data)
             data = self._cur.fetchone()
-        except Exception as e:
+        except psycopg2.Error as e:
+            self._logger.warning("Failed to read one")
+            self._logger.warning(e)
             
             #Reconecct and try again
-            self._connect()
-            self._cur.execute(sql,data)
-            data = self._cur.fetchone()
+            self._logger.debug("Retrying read operation")
+            try:
+                self._connect()
+                self._cur.execute(sql,data)
+                data = self._cur.fetchone()
+            except psycopg2.Error as e:
+                self._logger.critical("Retry read one Failed")
+                self._logger.critical(e)
 
+        self._logger.debug("data read: %s", data)
         return data
 
     def _write(self, sql, data):
+        self._logger.debug("Write into Db")
+        self._logger.debug(sql)
+        self._logger.debug(data)
 
         try:
             self._cur.execute(sql,data)
@@ -40,15 +90,23 @@ class DB():
         except Exception as e:
             
             #Reconecct and try again
-            self._cur.execute(sql,data)
-            self._conn.commit()
+            self._logger.debug("Retrying write operation")
+            try:
+                self._connect()
+                self._cur.execute(sql,data)
+                self._conn.commit()
+            except psycopg2.Error as e:
+                self._logger.critical("Write Failed")
+                self._logger.critical(e)
 
     def writeStats(self, players:list):
+        self._logger.debug("start Player write")
         #ToDo: performance
         for player in players:
             self._writePlayer(player)
             self._writeAllianz(player)
             self._writeStats(player)
+        self._logger.debug("Complete Player write complete count: %s",len(player))
 
     def _writePlayer(self, player:PlayerStats):
         sql = """INSERT INTO public.player(

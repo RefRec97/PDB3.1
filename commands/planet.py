@@ -1,9 +1,13 @@
 import interactions
+import logging
 from utils.authorisation import Authorization
 from utils.db import DB
 
 class Planet(interactions.Extension):
     def __init__(self, client, args):
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("Initialization")
+
         self._client: interactions.Client = client
         self._auth:Authorization = args[0]
         self._db:DB = args[1]
@@ -40,6 +44,9 @@ class Planet(interactions.Extension):
         ],
     )
     async def planet(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.debug("Arguments: %s", str((galaxy,system,position)))
+
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
@@ -88,6 +95,9 @@ class Planet(interactions.Extension):
         ],
     )
     async def delPlanet(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.debug("Arguments: %s", str((galaxy,system,position)))
+        
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return

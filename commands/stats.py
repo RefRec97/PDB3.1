@@ -1,9 +1,13 @@
 import interactions
+import logging
 from utils.authorisation import Authorization
 from utils.db import DB
 
 class Stats(interactions.Extension):
     def __init__(self, client, args):
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("Initialization")
+
         self._client: interactions.Client = client
         self._auth:Authorization = args[0]
         self._db:DB = args[1]
@@ -21,6 +25,9 @@ class Stats(interactions.Extension):
         ],
     )
     async def stats(self, ctx: interactions.CommandContext, username:str = None):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.debug("Username: %s", username)
+
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
@@ -82,7 +89,9 @@ class Stats(interactions.Extension):
 
     #Planet Modal
     @interactions.extension_component("btn_planet")
-    async def modal_planet(self, ctx:interactions.ComponentContext):        
+    async def modal_planet(self, ctx:interactions.ComponentContext):      
+        self._logger.debug("Button clicked: btn_planet from %s", ctx.user.username)
+
         if not self._auth.check(ctx.user.id, "planet"):
             return
         
@@ -124,6 +133,9 @@ class Stats(interactions.Extension):
     #Confirm Planet Modal
     @interactions.extension_modal("modal_planet")
     async def modal_planet_save(self, ctx:interactions.ComponentContext, galaxy:str, system:str, position:str):
+        self._logger.debug("Modal Confirmed from: %s", ctx.user.username)
+        self._logger.debug("Arguments: %s", str((galaxy,system,position)))
+
         if not self._auth.check(ctx.user.id, "planet"):
             return
 

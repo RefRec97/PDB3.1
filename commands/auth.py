@@ -1,9 +1,13 @@
 import interactions
+import logging
 from utils.authorisation import Authorization
 import config
 
 class Auth(interactions.Extension):
     def __init__(self, client, args):
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("Initialization")
+
         self._client: interactions.Client = client
         self._auth:Authorization = args
 
@@ -26,6 +30,9 @@ class Auth(interactions.Extension):
         scope=config.devDiscordId
     )
     async def admin(self, ctx: interactions.CommandContext, user:interactions.User):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.debug("Target: %s", str(user.username))
+
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
@@ -49,6 +56,9 @@ class Auth(interactions.Extension):
         scope=config.devDiscordId
     )
     async def auth(self, ctx: interactions.CommandContext, user:interactions.User):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.debug("Target: %s", str(user.username))
+
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
@@ -63,6 +73,9 @@ class Auth(interactions.Extension):
         description="Authorisiert diesen Nutzer für den Bot"
     )
     async def authContext(self, ctx: interactions.CommandContext):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.debug("Target: %s", str(ctx.target.user.username))
+
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
