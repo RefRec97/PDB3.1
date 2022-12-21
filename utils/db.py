@@ -106,7 +106,7 @@ class DB():
             self._writePlayer(player)
             self._writeAllianz(player)
             self._writeStats(player)
-        self._logger.debug("Complete Player write complete count: %s",len(player))
+        self._logger.debug("Complete Player write complete count: %s",len(players))
 
     def _writePlayer(self, player:PlayerStats):
         sql = """INSERT INTO public.player(
