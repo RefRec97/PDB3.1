@@ -155,10 +155,9 @@ class DB():
     def getPlayerStats(self, playerId:str):
         sql = """SELECT * from public."stats"
             where stats."playerId" = %s
-            ORDER BY stats."timestamp" DESC
-            LIMIT 1;"""
+            ORDER BY stats."timestamp" DESC"""
 
-        return self._readOne(sql,(playerId,))
+        return self._read(sql,(playerId,))
 
     def getAllianceData(self, allianceId:str):
         sql = """SELECT * from public."alliance"

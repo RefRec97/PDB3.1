@@ -34,20 +34,28 @@ class Stats(interactions.Extension):
         
         try:
             statsEmbed,statsComponent = self._getStatsContent(username)
-        except:
+        except Exception as e:
+            self._logger.warning("Stats content may have an Error")
+            self._logger.warning(e)
             await ctx.send(f"{username} nicht gefunden")
             return
         
         await ctx.send(embeds=statsEmbed, components=statsComponent)
 
     def _getStatsContent(self, playerName:str):
-        
         playerData = self._db.getPlayerData(playerName)
         if not playerData:
             return False
         
         playerStats = self._db.getPlayerStats(playerData[1])
         allianceData = self._db.getAllianceData(playerData[5])
+
+
+        currentPlayerStats = playerStats[0]
+
+        currentPlayerStats = self._getCurrentPlayerStats(playerStats[0])
+        diffData = self._getStatsDifference(playerStats)
+
 
         #Embed Fields
         statsFields = [
@@ -59,12 +67,12 @@ class Stats(interactions.Extension):
             interactions.EmbedField(
                 inline=True,
                 name="Rang",
-                value=f"{playerStats[1]}\n{playerStats[5]}\n{playerStats[3]}\n{playerStats[9]}\n{playerStats[7]}\n"
+                value= self._getEmbedValueString(currentPlayerStats[0], diffData[0])
             ),
             interactions.EmbedField(
                 inline=True,
                 name="Punkte",
-                value=f"{playerStats[2]}\n{playerStats[6]}\n{playerStats[4]}\n{playerStats[10]}\n{playerStats[8]}\n"
+                value= self._getEmbedValueString(currentPlayerStats[1], diffData[1])
             )
         ]
 
@@ -77,7 +85,7 @@ class Stats(interactions.Extension):
             title=f"{playerData[2]}",
             description= f"{playerData[1]}\n{allianceData[2]}", #PlayerId and Alliance Name
             fields = statsFields,
-            timestamp=playerStats[19]
+            timestamp=playerStats[0][19]
         )
 
         statsComponent = interactions.Button(
@@ -151,6 +159,17 @@ class Stats(interactions.Extension):
 
         await ctx.send(embeds=planetEmbed)
 
+    def _getEmbedValueString(self, data, diff):
+        #get largest number
+        maxLenghtData = len(max(data, key=len))
+
+        result = "`"
+
+        for elementData,elementDiff in zip(data,diff):
+            result += elementData.ljust(maxLenghtData) + " " + elementDiff + "\n"
+
+        return result + "`"
+
     def _getPlanetEmbeds(self, planetData):
         planetEmbeds = [
             interactions.EmbedField(
@@ -181,6 +200,55 @@ class Stats(interactions.Extension):
             planetEmbeds[2].value = "-"
 
         return planetEmbeds
+
+    def _getCurrentPlayerStats(self, playerStats):
+        currentRank = [
+            self._formatNumber(playerStats[1]),
+            self._formatNumber(playerStats[5]),
+            self._formatNumber(playerStats[3]),
+            self._formatNumber(playerStats[9]),
+            self._formatNumber(playerStats[7]),
+        ]
+
+        currentScore = [
+            self._formatNumber(playerStats[2]),
+            self._formatNumber(playerStats[6]),
+            self._formatNumber(playerStats[4]),
+            self._formatNumber(playerStats[10]),
+            self._formatNumber(playerStats[8]),
+        ]
+        return [currentRank, currentScore]
+
+    def _getStatsDifference(self, playerStats):
+        if len(playerStats) == 1:
+            return [ 
+                ["n/a","n/a","n/a","n/a","n/a"],
+                ["n/a","n/a","n/a","n/a","n/a",]
+            ]
+
+        current = playerStats[0]
+        last= playerStats[1]
+            
+        diffRank = [
+            self._formatDiff(int(current[1])-int(last[1])),
+            self._formatDiff(int(current[5])-int(last[5])),
+            self._formatDiff(int(current[3])-int(last[3])),
+            self._formatDiff(int(current[9])-int(last[9])),
+            self._formatDiff(int(current[7])-int(last[7]))
+        ]
+
+        diffStats = [
+            self._formatDiff(int(current[2])-int(last[2])),
+            self._formatDiff(int(current[6])-int(last[6])),
+            self._formatDiff(int(current[4])-int(last[4])),
+            self._formatDiff(int(current[10])-int(last[10])),
+            self._formatDiff(int(current[8])-int(last[8]))
+        ]
+
+        return [diffRank, diffStats]
+
+    def _formatDiff(self, number):
+        return f"({number:+,})".replace(",",".")
 
     def _formatNumber(self, number):
         return f"{number:,}".replace(",",".")

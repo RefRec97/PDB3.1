@@ -19,6 +19,7 @@ class Update():
         self._clock()
         
     def stop(self):
+        self._logger.debug("Stopping Clock")
         #stop restarting the Timer
         self._running = False
 
@@ -26,7 +27,6 @@ class Update():
         self._updateStats()
 
     def _clock(self):
-        self._logger.debug("Clock Tick")
         if self._running:
             #Runs every 10 second
             threading.Timer(10, self._clock).start()
