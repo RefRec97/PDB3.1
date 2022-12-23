@@ -2,6 +2,7 @@ import interactions
 import logging
 from utils.authorisation import Authorization
 from utils.db import DB
+from utils.chartMaker import ChartMaker
 
 class Stats(interactions.Extension):
     def __init__(self, client, args):
@@ -11,6 +12,7 @@ class Stats(interactions.Extension):
         self._client: interactions.Client = client
         self._auth:Authorization = args[0]
         self._db:DB = args[1]
+        self._chartMaker:ChartMaker = args[2]
     
     @interactions.extension_command(
         name="stats",
@@ -85,7 +87,12 @@ class Stats(interactions.Extension):
             title=f"{playerData[2]}",
             description= f"{playerData[1]}\n{allianceData[2]}", #PlayerId and Alliance Name
             fields = statsFields,
-            timestamp=playerStats[0][19]
+            timestamp=playerStats[0][19],
+            thumbnail=interactions.EmbedImageStruct(
+                url=self._chartMaker.getChartUrl(playerStats,playerData[2]),
+                height=720,
+                width=420
+            )
         )
 
         statsComponent = interactions.Button(
@@ -189,6 +196,7 @@ class Stats(interactions.Extension):
             ),
         ]
 
+        planetData.sort(key=lambda element: (element[2], element[3], element[4]))
         for planet in planetData:
             planetEmbeds[0].value += f"{planet[2]}:{planet[3]}:{planet[4]}\n"
             planetEmbeds[1].value += f"-\n" #WIP
