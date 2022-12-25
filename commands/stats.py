@@ -79,8 +79,10 @@ class Stats(interactions.Extension):
         ]
 
         #Add Planet Data
-        planetData = self._db.getUserPlanets(playerData[1])
-        statsFields += self._getPlanetEmbeds(planetData)
+        statsFields += self._getPlanetFields(playerData[1])
+
+        #Add Research Data
+        statsFields += self._getResearchFields(playerData[1])
 
         #Create Embed
         statsEmbed = interactions.Embed(
@@ -95,12 +97,19 @@ class Stats(interactions.Extension):
             )
         )
 
-        statsComponent = interactions.Button(
-            style=interactions.ButtonStyle.PRIMARY,
-            label='Planet Hinzufügen',
-            custom_id='btn_planet'
-        )
-        return (statsEmbed, statsComponent)
+        statsComponents = [
+            interactions.Button(
+                style=interactions.ButtonStyle.PRIMARY,
+                label='Planet Hinzufügen',
+                custom_id='btn_planet'
+            ),
+            interactions.Button(
+                style=interactions.ButtonStyle.PRIMARY,
+                label='Forschung ändern',
+                custom_id='btn_research'
+            ),
+        ]
+        return (statsEmbed, statsComponents)
 
     #Planet Modal
     @interactions.extension_component("btn_planet")
@@ -159,12 +168,85 @@ class Stats(interactions.Extension):
 
         self._db.updatePlanet(playerId, galaxy ,system, position)
 
-        planetEmbed = interactions.Embed(
-            title="Gespeichert",
-            description= f"{galaxy}:{system}:{position}",
-        )
+        #Workaround get playerName from Title
+        statsEmbed,statsButtons = self._getStatsContent(ctx.message.embeds[0].title)
 
-        await ctx.send(embeds=planetEmbed)
+        #edit original message
+        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        #confirm modal
+        await ctx.send()
+
+    #Research Modal
+    @interactions.extension_component("btn_research")
+    async def modal_research(self, ctx:interactions.ComponentContext):      
+        self._logger.debug("Button clicked: btn_research from %s", ctx.user.username)
+
+        if not self._auth.check(ctx.user.id, "research"):
+            return
+        
+        #Workaround get PlayerId from Description
+        playerId = ctx.message.embeds[0].description.split('\n')[0] 
+        currentResearch = self._db.getResearch(playerId)
+
+        if not currentResearch:
+            currentResearch = [0,0,0,0,0,]
+
+        researchModal = interactions.Modal(
+            title="Forschung ändern",
+            custom_id="modal_research",
+            components=[
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Waffentechnik",
+                    custom_id='reasearch_weapon',
+                    required=True,
+                    min_length=1,
+                    placeholder='1',
+                    value=currentResearch[2]
+                ),
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Schildtechnik",
+                    custom_id='reasearch_shield',
+                    required=True,
+                    min_length=1,
+                    placeholder='1',
+                    value=currentResearch[3]
+                ),
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Raumschiffpanzerung",
+                    custom_id='reasearch_armor',
+                    required=True,
+                    min_length=1,
+                    placeholder='1',
+                    value=currentResearch[4]
+                )
+            ]
+        )
+        await ctx.popup(researchModal)
+
+    #Confirm Research Modal
+    @interactions.extension_modal("modal_research")
+    async def modal_research_save(self, ctx:interactions.ComponentContext, weapon:str, shield:str, armor:str):
+        self._logger.debug("Modal Confirmed from: %s", ctx.user.username)
+        self._logger.debug("Arguments: %s", str((weapon,shield,armor)))
+
+        if not self._auth.check(ctx.user.id, "research"):
+            return
+
+        #Workaround get PlayerId from Description
+        playerId = ctx.message.embeds[0].description.split('\n')[0] 
+
+        self._db.setResearch(playerId,weapon,shield,armor)
+
+        #Workaround get playerName from Title
+        statsEmbed,statsButtons = self._getStatsContent(ctx.message.embeds[0].title)
+
+        #edit original message
+        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        #confirm modal
+        await ctx.send()
 
     def _getEmbedValueString(self, data, diff):
         #get largest number
@@ -177,7 +259,9 @@ class Stats(interactions.Extension):
 
         return result + "`"
 
-    def _getPlanetEmbeds(self, planetData):
+    def _getPlanetFields(self, playerId:str):
+        planetData = self._db.getUserPlanets(playerId)
+
         planetEmbeds = [
             interactions.EmbedField(
                 name="Position",
@@ -208,6 +292,33 @@ class Stats(interactions.Extension):
             planetEmbeds[2].value = "-"
 
         return planetEmbeds
+
+    def _getResearchFields(self, playerId:str):
+
+        researchData = self._db.getResearch(playerId)
+
+        if not researchData:
+            researchData = [0,0,'-','-','-','Kein Eintrag']
+
+        researchFields= [
+            interactions.EmbedField(
+                inline=True,
+                name="Forschung",
+                value="Waffentechnik\nSchildtechnik\nRaumschiffpanzerung"
+            ),
+            interactions.EmbedField(
+                inline=True,
+                name="Level",
+                value=f"{researchData[2]}\n{researchData[3]}\n{researchData[4]}"
+            ),
+            interactions.EmbedField(
+                inline=True,
+                name="Letze Forschungs änderung: ",
+                value=f"{researchData[5]}"
+            )
+        ]
+
+        return researchFields
 
     def _getCurrentPlayerStats(self, playerStats):
         currentRank = [

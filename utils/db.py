@@ -199,3 +199,19 @@ class DB():
 
         self._write(sql,(playerId, galaxy, system, position))
 
+    def getResearch(self, playerId:str):
+        sql = """SELECT * FROM public.research
+	        WHERE research."playerId" = %s"""
+
+        return self._readOne(sql,(playerId,))
+
+    def setResearch(self, playerId:str, weapon:int, shield:int, armor:int):
+        sql = """ INSERT INTO public.research(
+            "playerId", "weapon", "shield", "armor")
+            VALUES (%s, %s, %s, %s)
+            on conflict ("playerId") DO UPDATE 
+            SET "weapon" = excluded."weapon",
+                "shield" = excluded."shield",
+                "armor" = excluded."armor",
+                "timestamp" = now();"""
+        self._write(sql,(playerId, weapon, shield, armor))
