@@ -65,7 +65,7 @@ class Update():
 
                 players.append(player)  
 
-        self._db.writeStats(players)
+        self._db.setStats(players)
         
         self._logger.info("Update complete")
         
