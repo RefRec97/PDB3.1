@@ -41,7 +41,7 @@ class DB():
             self._logger.warning("Failed to Read")
             self._logger.warning(e)
 
-            #Reconecct and try again
+            #Reconect and try again
             self._logger.debug("Retrying read operation")
             try:
                 self._connect()
@@ -54,7 +54,7 @@ class DB():
         self._logger.debug("data read: %s", data)
         return data
 
-    def _readOne(self, sql, data):
+    def _readOne(self, sql:str, data:tuple):
         self._logger.debug("Read one from Db")
         self._logger.debug(sql)
         self._logger.debug(data)
@@ -66,7 +66,7 @@ class DB():
             self._logger.warning("Failed to read one")
             self._logger.warning(e)
             
-            #Reconecct and try again
+            #Reconect and try again
             self._logger.debug("Retrying read operation")
             try:
                 self._connect()
@@ -79,7 +79,7 @@ class DB():
         self._logger.debug("data read: %s", data)
         return data
 
-    def _write(self, sql, data):
+    def _write(self, sql:str, data:tuple):
         self._logger.debug("Write into Db")
         self._logger.debug(sql)
         self._logger.debug(data)
@@ -89,7 +89,7 @@ class DB():
             self._conn.commit()
         except Exception as e:
             
-            #Reconecct and try again
+            #Reconect and try again
             self._logger.debug("Retrying write operation")
             try:
                 self._connect()
@@ -99,53 +99,36 @@ class DB():
                 self._logger.critical("Write Failed")
                 self._logger.critical(e)
 
-    def writeStats(self, players:list):
-        self._logger.debug("start Player write")
-        #ToDo: performance
-        for player in players:
-            self._writePlayer(player)
-            self._writeAllianz(player)
-            self._writeStats(player)
-        self._logger.debug("Complete Player write complete count: %s",len(players))
-
     def _writePlayer(self, player:PlayerStats):
         sql = """INSERT INTO public.player(
-                    "playerId", "playerName", "playerUniverse", "playerGalaxy", "allianceId")
-                    VALUES (%s, %s, %s, %s, %s) on conflict ("playerId", "playerName", "allianceId") do nothing; """
+            "playerId", "playerName", "playerUniverse", "playerGalaxy", "allianceId")
+            VALUES (%s, %s, %s, %s, %s) on conflict ("playerId", "playerName", "allianceId") do nothing; """
         self._write(sql,(player.playerId, player.playerName,player.playerUniverse,
-                         player.playerGalaxy, player.allianceId))
+            player.playerGalaxy, player.allianceId))
 
     def _writeAllianz(self, player:PlayerStats):
         sql = """INSERT INTO public.alliance(
-                    "allianceId", "allianceName")
-                    VALUES (%s, %s) on conflict ("allianceId", "allianceName") do nothing; """
+            "allianceId", "allianceName")
+            VALUES (%s, %s) on conflict ("allianceId", "allianceName") do nothing; """
         
         self._write(sql,(player.allianceId, player.allianceName))
 
     def _writeStats(self, player:PlayerStats):
         sql = """INSERT INTO public.stats(
-                    "rank", "score", "researchRank", "researchScore", "buildingRank", "buildingScore",
-                    "defensiveRank", "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost",
-                    "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId")
-                    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+            "rank", "score", "researchRank", "researchScore", "buildingRank", "buildingScore",
+            "defensiveRank", "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost",
+            "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId")
+            VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         
         self._write(sql,(player.rank, player.score, player.researchRank, player.researchScore, player.buildingRank,
-                         player.buildingScore, player.defensiveRank, player.defensiveScore, player.fleetRank,
-                         player.fleetScore, player.battlesWon, player.battlesLost, player.battlesDraw,
-                         player.debrisMetal, player.debrisCrystal, player.unitsDestroyed, player.unitsLost,
-                         player.playerId))
-
-    def addAuthorization(self, userId:str , role:int):
-        sql = """INSERT INTO public.authorization(
-                    "userId", "roleId")
-                    VALUES (%s, %s) ON CONFLICT ("userId") DO UPDATE
-                        SET "roleId" = excluded."roleId";"""
-        
-        self._write(sql,(userId, role))
+            player.buildingScore, player.defensiveRank, player.defensiveScore, player.fleetRank,
+            player.fleetScore, player.battlesWon, player.battlesLost, player.battlesDraw,
+            player.debrisMetal, player.debrisCrystal, player.unitsDestroyed, player.unitsLost,
+            player.playerId))
 
     def getAuthRole(self, userID:str):
         sql = """ SELECT "roleId" FROM public.authorization
-	                WHERE "userId" = %s;"""
+            WHERE "userId" = %s;"""
 
         try:
             return self._readOne(sql,(userID,))[0]
@@ -159,7 +142,7 @@ class DB():
 
         return self._read(sql,(playerId,))
 
-    def getAllianceData(self, allianceId:str):
+    def getAlliance(self, allianceId:str):
         sql = """SELECT * from public."alliance"
             where alliance."allianceId" = %s
             ORDER BY alliance."timestamp" DESC
@@ -167,7 +150,7 @@ class DB():
 
         return self._readOne(sql,(allianceId,))
 
-    def getUserPlanets(self, playerId:str):
+    def getPlayerPlanets(self, playerId:str):
         sql = """SELECT * FROM public.planet
 	        WHERE planet."playerId" = %s"""
 
@@ -180,15 +163,6 @@ class DB():
             LIMIT 1;"""
 
         return self._readOne(sql,(userName,))
-
-    def updatePlanet(self, playerId:str, galaxy:int, system:int, position:int):
-        sql = """INSERT INTO public.planet(
-            "playerId", "galaxy", "system", "position", "moon", "sensorPhalanx")
-            VALUES ( %s, %s, %s, %s, %s, %s) 
-            on conflict ("galaxy", "system", "position") DO UPDATE 
-            SET "playerId" = excluded."playerId" ;"""
-        
-        self._write(sql,(playerId, galaxy, system, position, False , 0 ))
 
     def delPlanet(self, playerId:str, galaxy:int, system:int, position:int):
         sql = """DELETE FROM public.planet
@@ -215,3 +189,29 @@ class DB():
                 "armor" = excluded."armor",
                 "timestamp" = now();"""
         self._write(sql,(playerId, weapon, shield, armor))
+
+    def setStats(self, players:list):
+        self._logger.debug("start Player write")
+        #ToDo: performance
+        for player in players:
+            self._writePlayer(player)
+            self._writeAllianz(player)
+            self._writeStats(player)
+        self._logger.debug("Complete Player write complete count: %s",len(players))
+    
+    def setAuthorization(self, userId:str , role:int):
+        sql = """INSERT INTO public.authorization(
+            "userId", "roleId")
+            VALUES (%s, %s) ON CONFLICT ("userId") DO UPDATE
+                SET "roleId" = excluded."roleId";"""
+        
+        self._write(sql,(userId, role))
+    
+    def setPlanet(self, playerId:str, galaxy:int, system:int, position:int):
+        sql = """INSERT INTO public.planet(
+            "playerId", "galaxy", "system", "position", "moon", "sensorPhalanx")
+            VALUES ( %s, %s, %s, %s, %s, %s) 
+            on conflict ("galaxy", "system", "position") DO UPDATE 
+            SET "playerId" = excluded."playerId" ;"""
+        
+        self._write(sql,(playerId, galaxy, system, position, False , 0 ))

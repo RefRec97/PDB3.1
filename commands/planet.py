@@ -55,7 +55,7 @@ class Planet(interactions.Extension):
         userId = self._db.getPlayerData(username)[1]
 
         #save planet
-        self._db.updatePlanet(userId, galaxy, system, position)
+        self._db.setPlanet(userId, galaxy, system, position)
 
         planetEmbed = interactions.Embed(
             title="Gespeichert",
@@ -106,7 +106,7 @@ class Planet(interactions.Extension):
         userId = self._db.getPlayerData(username)[1]
 
         #check if planet exists
-        userPlanets = self._db.getUserPlanets(userId)
+        userPlanets = self._db.getPlayerPlanets(userId)
 
         #Check and delete if found
         for planet in userPlanets:

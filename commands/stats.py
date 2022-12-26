@@ -50,7 +50,7 @@ class Stats(interactions.Extension):
             return False
         
         playerStats = self._db.getPlayerStats(playerData[1])
-        allianceData = self._db.getAllianceData(playerData[5])
+        allianceData = self._db.getAlliance(playerData[5])
 
 
         currentPlayerStats = playerStats[0]
@@ -166,7 +166,7 @@ class Stats(interactions.Extension):
         #Workaround get PlayerId from Description
         playerId = ctx.message.embeds[0].description.split('\n')[0] 
 
-        self._db.updatePlanet(playerId, galaxy ,system, position)
+        self._db.setPlanet(playerId, galaxy ,system, position)
 
         #Workaround get playerName from Title
         statsEmbed,statsButtons = self._getStatsContent(ctx.message.embeds[0].title)
@@ -260,7 +260,7 @@ class Stats(interactions.Extension):
         return result + "`"
 
     def _getPlanetFields(self, playerId:str):
-        planetData = self._db.getUserPlanets(playerId)
+        planetData = self._db.getPlayerPlanets(playerId)
 
         planetEmbeds = [
             interactions.EmbedField(
@@ -282,7 +282,7 @@ class Stats(interactions.Extension):
 
         planetData.sort(key=lambda element: (element[2], element[3], element[4]))
         for planet in planetData:
-            planetEmbeds[0].value += f"{planet[2]}:{planet[3]}:{planet[4]}\n"
+            planetEmbeds[0].value += f"{planet[2]}\:{planet[3]}\:{planet[4]}\n"
             planetEmbeds[1].value += f"-\n" #WIP
             planetEmbeds[2].value += f"-\n" #WIP
         

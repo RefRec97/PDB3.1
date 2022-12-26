@@ -55,5 +55,5 @@ class Authorization():
         return False
 
     def add(self, userId:int, role:int):
-        return self._db.addAuthorization(str(userId), role)
+        return self._db.setAuthorization(str(userId), role)
 
