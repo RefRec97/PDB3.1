@@ -156,11 +156,15 @@ class DB():
 
         return self._read(sql,(playerId,))
 
-    def getAlliance(self, allianceId:str):
+    def getAlliance(self, allianceName:str):
         sql = """SELECT * from public."alliance"
-            where alliance."allianceId" = %s
-            ORDER BY alliance."timestamp" DESC
-            LIMIT 1;"""
+            where lower(alliance."allianceName") = lower(%s);"""
+
+        return self._readOne(sql,(allianceName,))
+
+    def getAllianceById(self, allianceId:str):
+        sql = """SELECT * from public."alliance"
+            where alliance."allianceId" = %s;"""
 
         return self._readOne(sql,(allianceId,))
 
@@ -172,9 +176,7 @@ class DB():
 
     def getPlayerData(self, userName:str):
         sql = """ SELECT * FROM public.player
-            WHERE lower(player."playerName")=lower(%s)
-            ORDER BY player."timestamp" DESC
-            LIMIT 1;"""
+            WHERE lower(player."playerName")=lower(%s)"""
 
         return self._readOne(sql,(userName,))
 
@@ -192,6 +194,14 @@ class DB():
 	        WHERE research."playerId" = %s"""
 
         return self._readOne(sql,(playerId,))
+
+    def getAllianceStats(self, allianceID:str):
+        sql = """SELECT DISTINCT ON (player."playerId") stats."timestamp", player."playerId", * from public."stats"
+            inner join player on player."playerId" = stats."playerId"
+            where player."allianceId" = %s
+            ORDER BY player."playerId", stats."timestamp" DESC"""
+
+        return self._read(sql,(allianceID,))
 
     def setResearch(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(
