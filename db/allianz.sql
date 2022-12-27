@@ -9,12 +9,20 @@ CREATE TABLE IF NOT EXISTS public.alliance
     "allianceName" text COLLATE pg_catalog."default",
     "timestamp" timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT allianz_pkey PRIMARY KEY ("dbKey"),
-    CONSTRAINT id_name_alliance_unique UNIQUE ("allianceId", "allianceName")
+    CONSTRAINT id_name_alliance_unique UNIQUE ("allianceId")
 )
-WITH (
-    OIDS = FALSE
-)
+
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.alliance
     OWNER to poll;
+
+GRANT TRUNCATE, TRIGGER ON TABLE public.alliance TO "pdb-admin";
+
+GRANT DELETE ON TABLE public.alliance TO "pdb-overquota";
+
+GRANT SELECT ON TABLE public.alliance TO "pdb-ro";
+
+GRANT UPDATE, DELETE, INSERT, REFERENCES ON TABLE public.alliance TO "pdb-rw";
+
+GRANT ALL ON TABLE public.alliance TO poll;

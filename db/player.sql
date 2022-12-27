@@ -12,10 +12,20 @@ CREATE TABLE IF NOT EXISTS public.player
     "allianceId" integer,
     "timestamp" timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT player_pkey PRIMARY KEY ("dbKey"),
-    CONSTRAINT id_name_alli_player_unique UNIQUE ("playerId", "playerName", "allianceId")
+    CONSTRAINT id_name_alli_player_unique UNIQUE ("playerId")
 )
 
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.player
     OWNER to poll;
+
+GRANT TRUNCATE, TRIGGER ON TABLE public.player TO "pdb-admin";
+
+GRANT DELETE ON TABLE public.player TO "pdb-overquota";
+
+GRANT SELECT ON TABLE public.player TO "pdb-ro";
+
+GRANT UPDATE, DELETE, INSERT, REFERENCES ON TABLE public.player TO "pdb-rw";
+
+GRANT ALL ON TABLE public.player TO poll;

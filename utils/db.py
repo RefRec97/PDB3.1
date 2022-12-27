@@ -8,6 +8,8 @@ class DB():
         self._logger = logging.getLogger(__name__)
         self._logger.debug("Initialization in productive Environment: %s",str(prod))
 
+        self._savedAllianceData = []
+
         self._prod = prod
         self._connect()
 
@@ -102,14 +104,26 @@ class DB():
     def _writePlayer(self, player:PlayerStats):
         sql = """INSERT INTO public.player(
             "playerId", "playerName", "playerUniverse", "playerGalaxy", "allianceId")
-            VALUES (%s, %s, %s, %s, %s) on conflict ("playerId", "playerName", "allianceId") do nothing; """
+            VALUES (%s, %s, %s, %s, %s)
+            on conflict ("playerId") DO UPDATE 
+            SET "playerName" = excluded."playerName",
+                "allianceId" = excluded."allianceId",
+                "timestamp" = now();"""
+        
         self._write(sql,(player.playerId, player.playerName,player.playerUniverse,
             player.playerGalaxy, player.allianceId))
 
     def _writeAllianz(self, player:PlayerStats):
+        if player.allianceId in self._savedAllianceData:
+            return
+        self._savedAllianceData.append(player.allianceId)
+
         sql = """INSERT INTO public.alliance(
             "allianceId", "allianceName")
-            VALUES (%s, %s) on conflict ("allianceId", "allianceName") do nothing; """
+            VALUES (%s, %s)
+            on conflict ("allianceId") DO UPDATE 
+            SET "allianceName" = excluded."allianceName",
+                "timestamp" = now(); """
         
         self._write(sql,(player.allianceId, player.allianceName))
 
@@ -192,6 +206,8 @@ class DB():
 
     def setStats(self, players:list):
         self._logger.debug("start Player write")
+        
+        self._savedAllianceData = []
         #ToDo: performance
         for player in players:
             self._writePlayer(player)
