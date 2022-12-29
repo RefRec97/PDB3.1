@@ -118,7 +118,7 @@ class Stats(interactions.Extension):
         self._db.setPlanet(playerId, galaxy ,system, position)
 
         #Workaround get playerName from Title
-        statsEmbed,statsButtons = self._getStatsContent(ctx.message.embeds[0].title)
+        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
 
         #edit original message
         await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
@@ -190,7 +190,7 @@ class Stats(interactions.Extension):
         self._db.setResearch(playerId,weapon,shield,armor)
 
         #Workaround get playerName from Title
-        statsEmbed,statsButtons = self._getStatsContent(ctx.message.embeds[0].title)
+        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
 
         #edit original message
         await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
