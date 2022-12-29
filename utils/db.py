@@ -241,3 +241,23 @@ class DB():
             SET "playerId" = excluded."playerId" ;"""
         
         self._write(sql,(playerId, galaxy, system, position, False , 0 ))
+
+    def setMoon(self, playerId:str, galaxy:int, system:int, position:int, moon:bool):
+        sql = """UPDATE PUBLIC."planet"
+            SET MOON = %s
+            WHERE PLANET."playerId" = %s
+                AND PLANET."galaxy" = %s
+                AND PLANET."system" = %s
+                AND PLANET."position" = %s;"""
+        
+        self._write(sql,(moon, playerId, galaxy, system, position, ))
+    
+    def setSensor(self, playerId:str, galaxy:int, system:int, position:int, sensor:int):
+        sql = """UPDATE PUBLIC."planet"
+            SET "sensorPhalanx" = %s
+            WHERE PLANET."playerId" = %s
+                AND PLANET."galaxy" = %s
+                AND PLANET."system" = %s
+                AND PLANET."position" = %s;"""
+        
+        self._write(sql,(sensor, playerId, galaxy, system, position, ))

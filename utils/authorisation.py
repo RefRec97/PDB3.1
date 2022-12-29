@@ -9,7 +9,7 @@ class Authorization():
     ADMIN = 2
     ADMIN_COMMAND_LIST = ("update","shutdown","admin","auth", "Auth")
     USER = 3
-    USER_COMMAND_LIST = ("stats", "planet", "delplanet", "chart", "research", "alliance")
+    USER_COMMAND_LIST = ("stats", "planet", "delplanet", "chart", "research", "alliance", "moon", "delmoon", "sensor")
 
     NOT_AUTHORIZED_EMBED = interactions.Embed(
         title="Nicht Authorisiert",

@@ -2,7 +2,7 @@ import interactions
 import logging
 from utils.authorisation import Authorization
 from utils.db import DB
-from utils.chartMaker import ChartMaker
+from utils.chartCreator import ChartCreator
 
 class Chart(interactions.Extension):
     def __init__(self, client, args):
@@ -12,7 +12,7 @@ class Chart(interactions.Extension):
         self._client: interactions.Client = client
         self._auth:Authorization = args[0]
         self._db:DB = args[1]
-        self._chartMaker:ChartMaker = args[2]
+        self._chartCreator:ChartCreator = args[2]
     
     @interactions.extension_command(
         name="chart",
@@ -39,7 +39,7 @@ class Chart(interactions.Extension):
             return False
 
         playerStats = self._db.getPlayerStats(playerData[1])
-        chartUrl = self._chartMaker.getChartUrl(playerStats, playerData[2])
+        chartUrl = self._chartCreator.getChartUrl(playerStats, playerData[2])
         
         await ctx.send(chartUrl)
     

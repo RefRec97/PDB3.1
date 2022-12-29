@@ -4,7 +4,7 @@ import datetime
 from quickchart import QuickChart
 from utils.db import DB
 
-class ChartMaker():
+class ChartCreator():
 
     def __init__(self, db):
         self._logger = logging.getLogger(__name__)

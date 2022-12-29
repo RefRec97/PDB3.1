@@ -4,7 +4,8 @@ import datetime
 from utils.authorisation import Authorization
 from utils.db import DB
 from utils.update import Update
-from utils.chartMaker import ChartMaker
+from utils.chartCreator import ChartCreator
+from utils.statsCreator import StatsCreator
 import config
 
 
@@ -24,7 +25,8 @@ def main():
     db = DB(prod = True)
     update = Update(db)
     authroization = Authorization(db)
-    chartMaker = ChartMaker(db)
+    chartCreator = ChartCreator(db)
+    statsCreator = StatsCreator(db, chartCreator)
     
     #Create Bot
     client = interactions.Client(token=config.prodToken)
@@ -32,9 +34,9 @@ def main():
     #Load Commands
     client.load("commands.utils", args=(authroization, update))
     client.load("commands.auth", args=(authroization))
-    client.load("commands.stats", args=(authroization, db, chartMaker))
-    client.load("commands.planet", args=(authroization, db))
-    client.load("commands.chart", args=(authroization, db, chartMaker))
+    client.load("commands.stats", args=(authroization, db, statsCreator, chartCreator))
+    client.load("commands.planet", args=(authroization, db, statsCreator))
+    client.load("commands.chart", args=(authroization, db, chartCreator))
 
 
     #Start Bot
