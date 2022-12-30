@@ -3,6 +3,7 @@ import logging
 from utils.authorisation import Authorization
 from utils.db import DB
 from utils.statsCreator import StatsCreator
+from utils.chartCreator import ChartCreator
 
 class Stats(interactions.Extension):
     def __init__(self, client, args):
@@ -13,6 +14,7 @@ class Stats(interactions.Extension):
         self._auth:Authorization = args[0]
         self._db:DB = args[1]
         self._statsCreator:StatsCreator = args[2]
+        self._chartCreator:ChartCreator = args[3]
         
     
     @interactions.extension_command(
@@ -283,15 +285,21 @@ class Stats(interactions.Extension):
         if not allianceData:
             return False
 
+        allAllianceData = self._db.getAllAllianceStats(allianceData[1])
         allianceUserData = self._db.getAllianceStats(allianceData[1])
         allianceUserData.sort(key=lambda a: a[3]) #sort by Rank
-
+        
         #Create Embed
         allianceEmbed = interactions.Embed(
             title=f"{allianceData[2]}",
             description= f"Mitglieder: {len(allianceUserData)}",
             fields=self._getTopAlliancePlayerFields(allianceUserData),
-            timestamp=allianceUserData[0][0]
+            timestamp=allianceUserData[0][0],
+            thumbnail=interactions.EmbedImageStruct(
+                url=self._chartCreator.getAllianceUrl(allAllianceData,allianceData[2]),
+                height=720,
+                width=420
+            )
         )
 
         playerSelectMenus = self._getAlliancePlayerSelect(allianceUserData)
@@ -345,10 +353,10 @@ class Stats(interactions.Extension):
         return playerSelectMenus
 
     def _getTopAlliancePlayerFields(self, allianceData:tuple):
-        top5Fields = [
+        top10Fields = [
             interactions.EmbedField(
                 inline=True,
-                name="Top 5 Spieler",
+                name="Top 10 Spieler",
                 value=""
             ),
             interactions.EmbedField(
@@ -363,12 +371,12 @@ class Stats(interactions.Extension):
             )
         ]
         
-        for player in allianceData[:5]:
-            top5Fields[0].value += player[24] + "\n"
-            top5Fields[1].value += self._statsCreator.formatNumber(player[3]) + "\n"
-            top5Fields[2].value += self._statsCreator.formatNumber(player[4]) + "\n"
+        for player in allianceData[:10]:
+            top10Fields[0].value += player[24] + "\n"
+            top10Fields[1].value += self._statsCreator.formatNumber(player[3]) + "\n"
+            top10Fields[2].value += self._statsCreator.formatNumber(player[4]) + "\n"
         
-        return top5Fields
+        return top10Fields
 
 def setup(client, args):
     Stats(client, args)

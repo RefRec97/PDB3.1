@@ -203,6 +203,23 @@ class DB():
 
         return self._read(sql,(allianceID,))
 
+    def getAllAllianceStats(self, allianceID:str):
+        sql = """
+            SELECT PLAYER."playerName",
+                RANK,
+                SCORE,
+                STATS."researchScore",
+                STATS."buildingScore",
+                STATS."defensiveScore",
+                STATS."fleetScore",
+                STATS."timestamp"
+            FROM PUBLIC."stats"
+            INNER JOIN PLAYER ON PLAYER."playerId" = STATS."playerId"
+            WHERE PLAYER."allianceId" = %s
+            ORDER BY STATS."timestamp" ASC"""
+
+        return self._read(sql,(allianceID,))
+
     def setResearch(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(
             "playerId", "weapon", "shield", "armor")
