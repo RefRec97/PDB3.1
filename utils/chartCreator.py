@@ -5,6 +5,12 @@ from quickchart import QuickChart
 from utils.db import DB
 
 class ChartCreator():
+    _rankColor = "#4E79A7"
+    _scoreColor = "#F28E2B"
+    _buildingColor = "#E15759"
+    _researchColor = "#76B7B2"
+    _fleetColor = "#59A14F"
+    _devensiveColor= "#EDC948"
 
     def __init__(self, db):
         self._logger = logging.getLogger(__name__)
@@ -83,30 +89,35 @@ class ChartCreator():
                     "data": chartData["gesamt"],
                     "fill": False,
                     "pointRadius": 1,
+                    "borderColor": self._scoreColor
                 },{
                     "yAxisID": "pointAxis",
                     "label": "Gebäude",
                     "data": chartData["gebäude"],
                     "fill": False,
                     "pointRadius": 1,
+                    "borderColor": self._buildingColor
                 },{
                     "yAxisID": "pointAxis",
                     "label": "Forschung",
                     "data": chartData["forschung"],
                     "fill": False,
                     "pointRadius": 1,
+                    "borderColor": self._researchColor
                 },{
                     "yAxisID": "pointAxis",
                     "label": "Flotte",
                     "data": chartData["flotte"],
                     "fill": False,
                     "pointRadius": 1,
+                    "borderColor": self._fleetColor
                 },{
                     "yAxisID": "pointAxis",
                     "label": "Defensive",
                     "data": chartData["defensive"],
                     "fill": False,
                     "pointRadius": 1,
+                    "borderColor": self._devensiveColor
                 }]
             },
             "options": {
@@ -140,6 +151,7 @@ class ChartCreator():
                     "data": chartData["platz"],
                     "fill": False,
                     "pointRadius": 1,
+                    "borderColor": self._rankColor
                 }
             )
             qc.config["options"]["scales"]["yAxes"].append(
