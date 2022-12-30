@@ -59,5 +59,25 @@ class Bot(interactions.Extension):
             return
         await ctx.send("Online auf {} Server".format(len(self._client.guilds)))
     
+    @interactions.extension_command(
+        name="features",
+        description="Ungeordnete Liste der geplanten Updates"
+    )
+    async def features(self, ctx: interactions.CommandContext):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+        
+        featureLIst = """
+        Geplante Features (ungeordnet):
+            - Button zum Aktualisieren von den Stats
+            - Chart für Allianzen
+            - Liste von potentiell Inaktiven Spielern
+            - Chart von 2 Spielern Vergleichen
+            - Custom Charts (Typ,Zeitraum,...)"""
+
+        await ctx.send(featureLIst)
+    
 def setup(client, args):
     Bot(client, args)
