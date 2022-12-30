@@ -44,6 +44,22 @@ class Stats(interactions.Extension):
         await ctx.send(embeds=statsEmbed, components=statsComponent)
 
 
+    #Refresh Button
+    @interactions.extension_component("btn_reload")
+    async def btn_reload(self, ctx:interactions.ComponentContext):
+        print(1)
+        self._logger.debug("Button clicked: btn_alliance from %s", ctx.user.username)
+        if not self._auth.check(ctx.user.id, "alliance"):
+            return
+        
+        #Workaround get playerName from Title
+        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+
+        #edit original message
+        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        #confirm modal
+        await ctx.send()
+
     #Alliance Button
     @interactions.extension_component("btn_alliance")
     async def btn_alliance(self, ctx:interactions.ComponentContext):   

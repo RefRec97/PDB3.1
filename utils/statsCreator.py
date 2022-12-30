@@ -81,7 +81,13 @@ class StatsCreator():
                 label='Allianz',
                 custom_id='btn_alliance'
             ),
+            interactions.Button(
+                style=interactions.ButtonStyle.SUCCESS,
+                label='Aktualisieren',
+                custom_id='btn_reload'
+            ),
         ]
+        
         return (statsEmbed, statsComponents)
 
 
