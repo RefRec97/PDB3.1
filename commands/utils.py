@@ -71,8 +71,6 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
-            - Button zum Aktualisieren von den Stats
-            - Chart für Allianzen
             - Liste von potentiell Inaktiven Spielern
             - Chart von 2 Spielern Vergleichen
             - Custom Charts (Typ,Zeitraum,...)"""
