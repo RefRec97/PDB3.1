@@ -71,9 +71,11 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
-            - Liste von potentiell Inaktiven Spielern
             - Chart von 2 Spielern Vergleichen
-            - Custom Charts (Typ,Zeitraum,...)"""
+            - Custom Charts (Typ,Zeitraum,...)
+            - Allianz Plazierung pro update ausrechnen und speichern
+            - DB statistik (anzahl planeten,statseinträge,...)
+                (weil ich daten Geil finde!)"""
 
         await ctx.send(featureLIst)
     

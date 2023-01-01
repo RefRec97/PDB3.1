@@ -49,7 +49,6 @@ class Stats(interactions.Extension):
     #Refresh Button
     @interactions.extension_component("btn_reload")
     async def btn_reload(self, ctx:interactions.ComponentContext):
-        print(1)
         self._logger.debug("Button clicked: btn_alliance from %s", ctx.user.username)
         if not self._auth.check(ctx.user.id, "alliance"):
             return
@@ -279,6 +278,93 @@ class Stats(interactions.Extension):
         statsEmbed,statsButtons = self._statsCreator.getStatsContent(value[0])
         await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
         await ctx.send()
+
+    @interactions.extension_command(
+        name="inactive",
+        description="Potentiell inaktive Spieler",
+        options = [
+            interactions.Option(
+                name="lowerlimit",
+                description="Unteres Punkte Limit",
+                type=interactions.OptionType.INTEGER,
+                required=False
+            ),
+        ],
+    )
+    async def inactive(self, ctx: interactions.CommandContext, lowerlimit:int = 1000):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+
+        playerData = self._db.getCurrentPlayerData()
+
+        #Group Data by playerId
+        groupedData = {}
+        for datapoint in playerData:
+            if not datapoint[1] in groupedData:
+                groupedData[datapoint[1]] = {
+                    "playerName": datapoint[0],
+                    "userId": datapoint[1],
+                    "scores": [],
+                }
+            groupedData[datapoint[1]]["scores"].append(datapoint[2])
+
+        inactiveEmbed,inactiveComponent = self._getInactiveContent(groupedData, lowerlimit)
+
+        await ctx.send(embeds=inactiveEmbed, components=inactiveComponent)     
+
+
+    def _getInactiveContent(self, inactiveData:dict, lowerLimit:int):
+        inactivePlayers = []
+        for playerData in inactiveData.values():
+            count = 0
+            scores = playerData["scores"]
+            for idx,datapoint in enumerate(scores[:-2]):
+                if datapoint <= scores[idx+1] and datapoint > lowerLimit:
+                    count +=1
+                else:
+                    #Point increase
+                    break
+                
+                if count >= 4:
+                    inactivePlayers.append(playerData)
+                    break
+        
+        inactiveEmbed = interactions.Embed(
+            title= f"Inaktive Spieler ",
+            description= f"Punkte > {lowerLimit}",
+            fields=self._getInactiveEmbedFields(inactivePlayers)
+        )
+        return (inactiveEmbed,None)
+
+    def _getInactiveEmbedFields(self,inactivePlayers):
+        inactiveFields = []
+        fieldValue = ""
+        for idx,inactivePlayer in enumerate(inactivePlayers):
+            if idx%10 == 0 and fieldValue:
+                inactiveFields.append(
+                    interactions.EmbedField(
+                        name="Name",
+                        value=fieldValue,
+                        inline=True
+                    )
+                )
+                fieldValue = ""
+            
+            fieldValue+=inactivePlayer["playerName"] + "\n"
+        
+        #Add not fully filled Field (if exist)
+        if fieldValue:
+            inactiveFields.append(
+                interactions.EmbedField(
+                    name="Name",
+                    value=fieldValue,
+                    inline=True
+                )
+            )
+            
+        return inactiveFields
 
     def _getAllianceContent(self,allianceName:str):
         allianceData = self._db.getAlliance(allianceName)

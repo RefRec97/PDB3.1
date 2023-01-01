@@ -220,6 +220,20 @@ class DB():
 
         return self._read(sql,(allianceID,))
 
+    def getCurrentPlayerData(self):
+        sql = """
+            SELECT 
+                PLAYER."playerName",
+                PLAYER."playerId",
+                SCORE,
+                STATS."timestamp"
+            FROM PUBLIC."stats"
+            INNER JOIN PLAYER ON PLAYER."playerId" = STATS."playerId"
+            WHERE stats."timestamp" > current_date - interval '2' day
+            ORDER BY STATS."timestamp" DESC"""
+        
+        return self._read(sql,())
+
     def setResearch(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(
             "playerId", "weapon", "shield", "armor")
