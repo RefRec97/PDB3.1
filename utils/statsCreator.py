@@ -59,7 +59,16 @@ class StatsCreator():
             fields = statsFields,
             timestamp=playerStats[0][19],
             thumbnail=interactions.EmbedImageStruct(
-                url=self._chartCreator.getChartUrl(playerStats,playerData[2]),
+                url=self._chartCreator.getChartUrl(playerStats,playerData[2],
+                        [
+                            self._chartCreator.RANK,
+                            self._chartCreator.SCORE,
+                            self._chartCreator.BUILDINGSCORE,
+                            self._chartCreator.RESEARCHSCORE,
+                            self._chartCreator.FLEETSCORE,
+                            self._chartCreator.DEFENSIVESCORE
+                        ]
+                    ),
                 height=720,
                 width=420
             )
