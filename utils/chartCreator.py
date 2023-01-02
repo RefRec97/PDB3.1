@@ -178,149 +178,148 @@ class ChartCreator():
 
         #Set Datasets
         for type in types:
-            match type:
-                case self.RANK:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Rang",
-                        "data": chartData["rank"],
-                        "fill": False,
-                        "pointRadius": 1,
-                        "borderColor": self._rankColor}
-                    )
-                case self.SCORE:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Gesamtpunkte",
-                        "data": chartData["score"],
-                        "fill": False,
-                        "pointRadius": 1,
-                        "borderColor": self._scoreColor}
-                    )
-                case self.RESEARCHRANK:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Forschungsrang",
-                        "data": chartData["researchRank"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.RESEARCHSCORE:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Forschungspunkte",
-                        "data": chartData["researchScore"],
-                        "fill": False,
-                        "pointRadius": 1,
-                        "borderColor": self._researchScoreColor}
-                    )
-                case self.BUILDINGRANK:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Gebäuderang",
-                        "data": chartData["buildinghRank"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.BUILDINGSCORE:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Gebäudepunkte",
-                        "data": chartData["buildingScore"],
-                        "fill": False,
-                        "pointRadius": 1,
-                        "borderColor": self._buildingScoreColor}
-                    )
-                case self.DEFENSIVERANK:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Verteidigungsrang",
-                        "data": chartData["defensiveRank"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.DEFENSIVESCORE:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Verteidigungspunkte",
-                        "data": chartData["defensiveScore"],
-                        "fill": False,
-                        "pointRadius": 1,
-                        "borderColor": self._defensiveScoreColor}
-                    )
-                case self.FLEETRANK:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Flottenrang",
-                        "data": chartData["fleetRank"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.FLEETSCORE:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Flottenpunkte",
-                        "data": chartData["fleetScore"],
-                        "fill": False,
-                        "pointRadius": 1,
-                        "borderColor": self._fleetScoreColor}
-                    )
-                case self.BATTLESWON:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Gewonnene Kämpfe",
-                        "data": chartData["battlesWon"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.BATTLESLOST:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Verlorene Kämpfe",
-                        "data": chartData["battlesLost"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.BATTLESDRAW:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "lowAxis",
-                        "label": "Unentschieden",
-                        "data": chartData["battlesDraw"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.DEBRISMETAL:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Trümmerfeld Metall",
-                        "data": chartData["debrisMetal"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.DEBRISCRYSTAL:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Trümmerfeld Kristall",
-                        "data": chartData["debrisCrystal"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.UNITSDESTROYED:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "highAxis",
-                        "label": "Zerstörte Einheiten",
-                        "data": chartData["unitsDestroyed"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
-                case self.UNITSLOST:
-                    qc.config["data"]["datasets"].append({
-                        "yAxisID": "unitsLost",
-                        "label": "Verlorene Einheiten",
-                        "data": chartData["unitsLost"],
-                        "fill": False,
-                        "pointRadius": 1}
-                    )
+            if type == self.RANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Rang",
+                    "data": chartData["rank"],
+                    "fill": False,
+                    "pointRadius": 1,
+                    "borderColor": self._rankColor}
+                )
+            elif type == self.SCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Gesamtpunkte",
+                    "data": chartData["score"],
+                    "fill": False,
+                    "pointRadius": 1,
+                    "borderColor": self._scoreColor}
+                )
+            elif type == self.RESEARCHRANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Forschungsrang",
+                    "data": chartData["researchRank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.RESEARCHSCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Forschungspunkte",
+                    "data": chartData["researchScore"],
+                    "fill": False,
+                    "pointRadius": 1,
+                    "borderColor": self._researchScoreColor}
+                )
+            elif type == self.BUILDINGRANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Gebäuderang",
+                    "data": chartData["buildinghRank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.BUILDINGSCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Gebäudepunkte",
+                    "data": chartData["buildingScore"],
+                    "fill": False,
+                    "pointRadius": 1,
+                    "borderColor": self._buildingScoreColor}
+                )
+            elif type == self.DEFENSIVERANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Verteidigungsrang",
+                    "data": chartData["defensiveRank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.DEFENSIVESCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Verteidigungspunkte",
+                    "data": chartData["defensiveScore"],
+                    "fill": False,
+                    "pointRadius": 1,
+                    "borderColor": self._defensiveScoreColor}
+                )
+            elif type == self.FLEETRANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Flottenrang",
+                    "data": chartData["fleetRank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.FLEETSCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Flottenpunkte",
+                    "data": chartData["fleetScore"],
+                    "fill": False,
+                    "pointRadius": 1,
+                    "borderColor": self._fleetScoreColor}
+                )
+            elif type == self.BATTLESWON:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Gewonnene Kämpfe",
+                    "data": chartData["battlesWon"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.BATTLESLOST:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Verlorene Kämpfe",
+                    "data": chartData["battlesLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.BATTLESDRAW:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": "Unentschieden",
+                    "data": chartData["battlesDraw"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.DEBRISMETAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Trümmerfeld Metall",
+                    "data": chartData["debrisMetal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.DEBRISCRYSTAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Trümmerfeld Kristall",
+                    "data": chartData["debrisCrystal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.UNITSDESTROYED:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Zerstörte Einheiten",
+                    "data": chartData["unitsDestroyed"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.UNITSLOST:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "unitsLost",
+                    "label": "Verlorene Einheiten",
+                    "data": chartData["unitsLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
 
         #Set Axis
         highAxisNotSet = True
