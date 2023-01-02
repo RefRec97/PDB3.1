@@ -314,7 +314,7 @@ class ChartCreator():
                 )
             elif type == self.UNITSLOST:
                 qc.config["data"]["datasets"].append({
-                    "yAxisID": "unitsLost",
+                    "yAxisID": "highAxis",
                     "label": "Verlorene Einheiten",
                     "data": chartData["unitsLost"],
                     "fill": False,
