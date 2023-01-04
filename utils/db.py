@@ -190,8 +190,16 @@ class DB():
         self._write(sql,(playerId, galaxy, system, position))
 
     def getResearch(self, playerId:str):
-        sql = """SELECT * FROM public.research
-	        WHERE research."playerId" = %s"""
+        sql = """SELECT
+            WEAPON,
+            SHIELD,
+            ARMOR,
+            COMBUSTION,
+            IMPULSE,
+            HYPERSPACE,
+            "timestamp"
+        FROM PUBLIC.RESEARCH
+	    WHERE research."playerId" = %s"""
 
         return self._readOne(sql,(playerId,))
 
@@ -234,7 +242,7 @@ class DB():
         
         return self._read(sql,())
 
-    def setResearch(self, playerId:str, weapon:int, shield:int, armor:int):
+    def setResearchAttack(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(
             "playerId", "weapon", "shield", "armor")
             VALUES (%s, %s, %s, %s)
@@ -244,6 +252,17 @@ class DB():
                 "armor" = excluded."armor",
                 "timestamp" = now();"""
         self._write(sql,(playerId, weapon, shield, armor))
+    
+    def setResearchDrive(self, playerId:str, combustion:int, impulse:int, hyperspace:int):
+        sql = """ INSERT INTO public.research(
+            "playerId","combustion", "impulse", "hyperspace")
+            VALUES (%s, %s, %s, %s)
+            on conflict ("playerId") DO UPDATE 
+            SET "combustion" = excluded."combustion",
+                "impulse" = excluded."impulse",
+                "hyperspace" = excluded."hyperspace",
+                "timestamp" = now();"""
+        self._write(sql,(playerId, combustion, impulse, hyperspace))
 
     def setStats(self, players:list):
         self._logger.debug("start Player write")

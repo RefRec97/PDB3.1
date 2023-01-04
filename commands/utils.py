@@ -72,7 +72,6 @@ class Bot(interactions.Extension):
         featureLIst = """
         Geplante Features (ungeordnet):
             - Chart von 2 Spielern Vergleichen
-            - Custom Charts (Typ,Zeitraum,...)
             - Allianz Plazierung pro update ausrechnen und speichern
             - DB statistik (anzahl planeten,statseinträge,...)
                 (weil ich daten Geil finde!)"""
@@ -81,3 +80,4 @@ class Bot(interactions.Extension):
     
 def setup(client, args):
     Bot(client, args)
+    

@@ -142,10 +142,10 @@ class Stats(interactions.Extension):
         #confirm modal
         await ctx.send()
 
-    #Research Modal
-    @interactions.extension_component("btn_research")
-    async def modal_research(self, ctx:interactions.ComponentContext):      
-        self._logger.debug("Button clicked: btn_research from %s", ctx.user.username)
+    #Attack research Modal
+    @interactions.extension_component("btn_research_attack")
+    async def modal_research_attack(self, ctx:interactions.ComponentContext):      
+        self._logger.debug("Button clicked: btn_research_attack from %s", ctx.user.username)
 
         if not self._auth.check(ctx.user.id, "research"):
             return
@@ -155,11 +155,11 @@ class Stats(interactions.Extension):
         currentResearch = self._db.getResearch(playerId)
 
         if not currentResearch:
-            currentResearch = [0,0,0,0,0,]
+            currentResearch = [0,0,0]
 
         researchModal = interactions.Modal(
-            title="Forschung ändern",
-            custom_id="modal_research",
+            title="Angirffsforschung ändern",
+            custom_id="modal_research_attack",
             components=[
                 interactions.TextInput(
                     style=interactions.TextStyleType.SHORT,
@@ -168,7 +168,7 @@ class Stats(interactions.Extension):
                     required=True,
                     min_length=1,
                     placeholder='1',
-                    value=currentResearch[2]
+                    value=currentResearch[0]
                 ),
                 interactions.TextInput(
                     style=interactions.TextStyleType.SHORT,
@@ -177,7 +177,7 @@ class Stats(interactions.Extension):
                     required=True,
                     min_length=1,
                     placeholder='1',
-                    value=currentResearch[3]
+                    value=currentResearch[1]
                 ),
                 interactions.TextInput(
                     style=interactions.TextStyleType.SHORT,
@@ -186,15 +186,15 @@ class Stats(interactions.Extension):
                     required=True,
                     min_length=1,
                     placeholder='1',
-                    value=currentResearch[4]
+                    value=currentResearch[2]
                 )
             ]
         )
         await ctx.popup(researchModal)
 
-    #Confirm Research Modal
-    @interactions.extension_modal("modal_research")
-    async def modal_research_save(self, ctx:interactions.ComponentContext, weapon:str, shield:str, armor:str):
+    #Confirm Attack Research Modal
+    @interactions.extension_modal("modal_research_attack")
+    async def modal_research_attack_save(self, ctx:interactions.ComponentContext, weapon:str, shield:str, armor:str):
         self._logger.debug("Modal Confirmed from: %s", ctx.user.username)
         self._logger.debug("Arguments: %s", str((weapon,shield,armor)))
 
@@ -204,7 +204,7 @@ class Stats(interactions.Extension):
         #Workaround get PlayerId from Description
         playerId = ctx.message.embeds[0].description.split('\n')[0] 
 
-        self._db.setResearch(playerId,weapon,shield,armor)
+        self._db.setResearchAttack(playerId,weapon,shield,armor)
 
         #Workaround get playerName from Title
         statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
@@ -214,6 +214,78 @@ class Stats(interactions.Extension):
         #confirm modal
         await ctx.send()
 
+    #Drive research Modal
+    @interactions.extension_component("btn_research_drive")
+    async def modal_research_drive(self, ctx:interactions.ComponentContext):      
+        self._logger.debug("Button clicked: btn_research_drive from %s", ctx.user.username)
+
+        if not self._auth.check(ctx.user.id, "research"):
+            return
+        
+        #Workaround get PlayerId from Description
+        playerId = ctx.message.embeds[0].description.split('\n')[0] 
+        currentResearch = self._db.getResearch(playerId)
+
+        if not currentResearch:
+            currentResearch = [0,0,0,0,0,0]
+
+        researchModal = interactions.Modal(
+            title="Triebwerksforschung ändern",
+            custom_id="modal_research_drive",
+            components=[
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Verbrennungstriebwerk",
+                    custom_id='reasearch_combustion',
+                    required=True,
+                    min_length=1,
+                    placeholder='1',
+                    value=currentResearch[3]
+                ),
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Impulstriebwerk",
+                    custom_id='reasearch_impulse',
+                    required=True,
+                    min_length=1,
+                    placeholder='1',
+                    value=currentResearch[4]
+                ),
+                interactions.TextInput(
+                    style=interactions.TextStyleType.SHORT,
+                    label="Hyperraumantrieb",
+                    custom_id='reasearch_hyperspace',
+                    required=True,
+                    min_length=1,
+                    placeholder='1',
+                    value=currentResearch[5]
+                )
+            ]
+        )
+        await ctx.popup(researchModal)
+    
+    #Confirm Drive Research Modal
+    @interactions.extension_modal("modal_research_drive")
+    async def modal_research_drive_save(self, ctx:interactions.ComponentContext, combustion:str, impulse:str, hyperspace:str):
+        self._logger.debug("Modal Confirmed from: %s", ctx.user.username)
+        self._logger.debug("Arguments: %s", str((combustion,impulse,hyperspace)))
+
+        if not self._auth.check(ctx.user.id, "research"):
+            return
+
+        #Workaround get PlayerId from Description
+        playerId = ctx.message.embeds[0].description.split('\n')[0] 
+
+        self._db.setResearchDrive(playerId,combustion,impulse,hyperspace)
+
+        #Workaround get playerName from Title
+        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+
+        #edit original message
+        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        #confirm modal
+        await ctx.send()
+   
     @interactions.extension_command(
         name="alliance",
         description="Stats einer Alliance",

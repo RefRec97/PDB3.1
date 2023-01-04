@@ -82,8 +82,13 @@ class StatsCreator():
             ),
             interactions.Button(
                 style=interactions.ButtonStyle.PRIMARY,
-                label='Forschung ändern',
-                custom_id='btn_research'
+                label='Angriffsforschung ändern',
+                custom_id='btn_research_attack'
+            ),
+            interactions.Button(
+                style=interactions.ButtonStyle.PRIMARY,
+                label='Triebwersfroschung ändern',
+                custom_id='btn_research_drive'
             ),
             interactions.Button(
                 style=interactions.ButtonStyle.PRIMARY,
@@ -96,8 +101,7 @@ class StatsCreator():
                 custom_id='btn_reload'
             ),
         ]
-        
-        return (statsEmbed, statsComponents)
+        return (statsEmbed, interactions.spread_to_rows(*statsComponents))
 
 
     def _getPlanetFields(self, playerId:str):
@@ -147,23 +151,23 @@ class StatsCreator():
         researchData = self._db.getResearch(playerId)
 
         if not researchData:
-            researchData = [0,0,'-','-','-','Kein Eintrag']
+            researchData = ['-','-','-','-','-','-''Kein Eintrag']
 
         researchFields= [
             interactions.EmbedField(
                 inline=True,
-                name="Forschung",
-                value="Waffentechnik\nSchildtechnik\nRaumschiffpanzerung"
+                name="Angriff",
+                value=f":crossed_swords: {researchData[0]}\n:shield: {researchData[1]}\n :flying_saucer: {researchData[2]}\n"
             ),
             interactions.EmbedField(
                 inline=True,
-                name="Level",
-                value=f"{researchData[2]}\n{researchData[3]}\n{researchData[4]}"
+                name="Triebwerk",
+                value=f":fire: {researchData[3]}\n:zap: {researchData[4]}\n:cyclone: {researchData[5]}\n"
             ),
             interactions.EmbedField(
                 inline=True,
-                name="Letze Forschungs änderung: ",
-                value=f"{researchData[5]}"
+                name="Zeit",
+                value=f":clock2:{researchData[6]}\n"
             )
         ]
 

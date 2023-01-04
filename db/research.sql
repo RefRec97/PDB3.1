@@ -6,10 +6,13 @@ CREATE TABLE IF NOT EXISTS public.research
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "playerId" integer,
-    weapon smallint,
-    shield smallint,
-    armor smallint,
+    weapon smallint DEFAULT 0,
+    shield smallint DEFAULT 0,
+    armor smallint DEFAULT 0,
     "timestamp" timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    combustion smallint DEFAULT 0,
+    impulse smallint DEFAULT 0,
+    hyperspace smallint DEFAULT 0,
     CONSTRAINT research_pkey PRIMARY KEY ("dbKey"),
     CONSTRAINT player_unique UNIQUE ("playerId")
 )
