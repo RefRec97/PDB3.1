@@ -56,10 +56,8 @@ class Stats(interactions.Extension):
         #Workaround get playerName from Title
         statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
 
-        #edit original message
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
-        #confirm modal
-        await ctx.send()
+        #Update
+        await ctx.edit(embeds=statsEmbed, components=statsButtons)
 
     #Alliance Button
     @interactions.extension_component("btn_alliance")
