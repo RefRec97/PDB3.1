@@ -151,7 +151,7 @@ class StatsCreator():
         researchData = self._db.getResearch(playerId)
 
         if not researchData:
-            researchData = ['-','-','-','-','-','-''Kein Eintrag']
+            researchData = ['-','-','-','-','-','-','Kein Eintrag']
 
         researchFields= [
             interactions.EmbedField(
