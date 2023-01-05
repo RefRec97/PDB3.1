@@ -535,8 +535,7 @@ class ChartCreator():
                     {
                         "id": "lowAxis",
                         "display": True,
-                        "position": "left",
-                        "stacked": True,
+                        "position": "left"
                     }
                 )
         return result
