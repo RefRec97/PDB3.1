@@ -71,7 +71,7 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
-            - Chart von 2 Spielern Vergleichen
+            - \"Miner's Toolbox\"
             - Allianz Plazierung pro update ausrechnen und speichern
             - DB statistik (anzahl planeten,statseinträge,...)
                 (weil ich daten Geil finde!)"""

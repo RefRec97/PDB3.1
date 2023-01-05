@@ -101,54 +101,254 @@ class ChartCreator():
 
         return chartData
 
-    def _getChartData(self, userData):
-        chartData= {
-            "rank": [],
-            "score": [],
-            "researchRank": [],
-            "researchScore": [],
-            "buildingRank": [],
-            "buildingScore": [],
-            "defensiveRank": [],
-            "defensiveScore": [],
-            "fleetRank": [],
-            "fleetScore": [],
-            "battlesWon": [],
-            "battlesLost": [],
-            "battlesDraw": [],
-            "debrisMetal": [],
-            "debrisCrystal": [],
-            "unitsDestroyed": [],
-            "unitsLost": [],
-            "labels": []
-        }
+    def _getChartData(self, userData:list):
+        
+        userChartData = []
+        
+        for user in userData:
+            chartData= {
+                "rank": [],
+                "score": [],
+                "researchRank": [],
+                "researchScore": [],
+                "buildingRank": [],
+                "buildingScore": [],
+                "defensiveRank": [],
+                "defensiveScore": [],
+                "fleetRank": [],
+                "fleetScore": [],
+                "battlesWon": [],
+                "battlesLost": [],
+                "battlesDraw": [],
+                "debrisMetal": [],
+                "debrisCrystal": [],
+                "unitsDestroyed": [],
+                "unitsLost": [],
+                "labels": []
+            }
 
-        for datapoint in reversed(userData):
-            chartData["rank"].append(datapoint[1])
-            chartData["score"].append(datapoint[2])
-            chartData["researchRank"].append(datapoint[3])
-            chartData["researchScore"].append(datapoint[4])
-            chartData["buildingRank"].append(datapoint[5])
-            chartData["buildingScore"].append(datapoint[6])
-            chartData["defensiveRank"].append(datapoint[7])
-            chartData["defensiveScore"].append(datapoint[8])
-            chartData["fleetRank"].append(datapoint[9])
-            chartData["fleetScore"].append(datapoint[10])
-            chartData["battlesWon"].append(datapoint[11])
-            chartData["battlesLost"].append(datapoint[12])
-            chartData["battlesDraw"].append(datapoint[13])
-            chartData["debrisMetal"].append(datapoint[14])
-            chartData["debrisCrystal"].append(datapoint[15])
-            chartData["unitsDestroyed"].append(datapoint[16])
-            chartData["unitsLost"].append(datapoint[17])
-            chartData["labels"].append(datetime.datetime.strftime(datapoint[-1], "%H-%d.%m.%Y") )
+            for datapoint in reversed(user):
+                chartData["rank"].append(datapoint[1])
+                chartData["score"].append(datapoint[2])
+                chartData["researchRank"].append(datapoint[3])
+                chartData["researchScore"].append(datapoint[4])
+                chartData["buildingRank"].append(datapoint[5])
+                chartData["buildingScore"].append(datapoint[6])
+                chartData["defensiveRank"].append(datapoint[7])
+                chartData["defensiveScore"].append(datapoint[8])
+                chartData["fleetRank"].append(datapoint[9])
+                chartData["fleetScore"].append(datapoint[10])
+                chartData["battlesWon"].append(datapoint[11])
+                chartData["battlesLost"].append(datapoint[12])
+                chartData["battlesDraw"].append(datapoint[13])
+                chartData["debrisMetal"].append(datapoint[14])
+                chartData["debrisCrystal"].append(datapoint[15])
+                chartData["unitsDestroyed"].append(datapoint[16])
+                chartData["unitsLost"].append(datapoint[17])
+                chartData["labels"].append(datetime.datetime.strftime(datapoint[-1], "%H-%d.%m.%Y") )
 
-        return chartData
+            userChartData.append(chartData)
+
+        return userChartData
 
     def getChartUrl(self, userData, userName, types):
-        chartData = self._getChartData(userData)
+        chartData = self._getChartData([userData])[0]
         
         return self._createChartUrl(chartData, userName, types)
+
+    def getCompareChart(self, userData:list, userNames:list, type):
+        chartData = self._getChartData(userData)
+
+        return self._createCompareChartUrl(chartData, userNames, type)
+    
+    def _createCompareChartUrl(self, chartData, userNames, type):
+        qc = QuickChart()
+        qc.width = 720
+        qc.height = 480
+
+
+        #Get correct Type as German Text
+        label = ""
+        if type == self.RANK:
+            label = "Rang",
+        elif type == self.SCORE:
+            label = "Gesamtpunkte"
+        elif type == self.RESEARCHRANK:
+            label = "Forschungsrang"
+        elif type == self.RESEARCHSCORE:
+            label = "Forschungspunkte"
+        elif type == self.BUILDINGRANK:
+            label = "Gebäuderang"
+        elif type == self.BUILDINGSCORE:
+            label = "Gebäudepunkte"
+        elif type == self.DEFENSIVERANK:
+            label = "Verteidigungsrang"
+        elif type == self.DEFENSIVESCORE:
+            label = "Verteidigungspunkte"
+        elif type == self.FLEETRANK:
+            label = "Flottenrang"
+        elif type == self.FLEETSCORE:
+            label = "Flottenpunkte"
+        elif type == self.BATTLESWON:
+            label = "Gewonnene Kämpfe"
+        elif type == self.BATTLESLOST:
+            label = "Verlorene Kämpfe"
+        elif type == self.BATTLESDRAW:
+            label = "Unentschieden"
+        elif type == self.DEBRISMETAL:
+            label = "Trümmerfeld Metall"
+        elif type == self.DEBRISCRYSTAL:
+            label = "Trümmerfeld Kristall"
+        elif type == self.UNITSDESTROYED:
+            label = "Zerstörte Einheiten"
+        elif type == self.UNITSLOST:
+            label = "Verlorene Einheiten"
+                 
+
+        #Set Default Config
+        qc.config = self._getDefaultConfig(chartData, label)
+
+        #ToDo: Rework with function _createChartUrl
+        for user,userName in zip(chartData,userNames):
+            if type == self.RANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["rank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.SCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["score"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.RESEARCHRANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["researchRank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.RESEARCHSCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["researchScore"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.BUILDINGRANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["buildinghRank"],
+                    "fill": False}
+                )
+            elif type == self.BUILDINGSCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["buildingScore"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.DEFENSIVERANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["defensiveRank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.DEFENSIVESCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["defensiveScore"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.FLEETRANK:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["fleetRank"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.FLEETSCORE:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["fleetScore"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.BATTLESWON:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["battlesWon"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.BATTLESLOST:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["battlesLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.BATTLESDRAW:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "lowAxis",
+                    "label": userName,
+                    "data": user["battlesDraw"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.DEBRISMETAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["debrisMetal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.DEBRISCRYSTAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["debrisCrystal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.UNITSDESTROYED:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["unitsDestroyed"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.UNITSLOST:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["unitsLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+        
+        qc.config["options"]["scales"]["yAxes"] = self._getAxisConfig([type])
+
+        return qc.get_short_url()
 
     def _createChartUrl(self, chartData, label, types):
         qc = QuickChart()
@@ -156,25 +356,7 @@ class ChartCreator():
         qc.height = 480
 
         #Set Default Config
-        qc.config = {
-            "type": "line",
-            "data": {
-                "labels": chartData["labels"],
-                "datasets": []
-            },
-            "options": {
-                "title": {
-                    "display": True,
-                    "text": label,
-                },
-                "scales": {
-                    "xAxes": [{
-                        "stacked": True
-                    }],
-                    "yAxes": []
-                }
-            }
-        }
+        qc.config = self._getDefaultConfig([chartData], label)
 
         #Set Datasets
         for type in types:
@@ -321,13 +503,20 @@ class ChartCreator():
                     "pointRadius": 1}
                 )
 
-        #Set Axis
+        
+        qc.config["options"]["scales"]["yAxes"] = self._getAxisConfig(types)
+        
+        return qc.get_short_url()
+
+    def _getAxisConfig(self,types):
+        result = []
+
         highAxisNotSet = True
         lowAxisNotSet = True
         for type in types:
             if type in self._highAxis and highAxisNotSet:
                 highAxisNotSet = False
-                qc.config["options"]["scales"]["yAxes"].append(
+                result.append(
                     {
                         "id": "highAxis",
                         "display": True,
@@ -342,7 +531,7 @@ class ChartCreator():
                 )
             if type in self._lowAxis and lowAxisNotSet:
                 lowAxisNotSet = False
-                qc.config["options"]["scales"]["yAxes"].append(
+                result.append(
                     {
                         "id": "lowAxis",
                         "display": True,
@@ -350,4 +539,27 @@ class ChartCreator():
                         "stacked": True,
                     }
                 )
-        return qc.get_short_url()
+        return result
+
+    def _getDefaultConfig(self, chartData, label):
+        
+        defaultConfig = {
+            "type": "line",
+            "data": {
+                "labels": chartData[0]["labels"],
+                "datasets": []
+            },
+            "options": {
+                "title": {
+                    "display": True,
+                    "text": label,
+                },
+                "scales": {
+                    "xAxes": [{
+                        "stacked": True
+                    }],
+                    "yAxes": []
+                }
+            }
+        }
+        return defaultConfig

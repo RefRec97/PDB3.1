@@ -145,6 +145,10 @@ class Chart(interactions.Extension):
                             type_3:str=None, type_4:str=None, type_5:str=None, type_6:str=None, type_7:str=None, type_8:str=None):
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
         self._logger.debug("Username: %s", username)
+        
+        if not self._auth.check(ctx.user.id, "chart"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
 
         playerData = self._db.getPlayerData(username)
         if not playerData:
@@ -158,6 +162,93 @@ class Chart(interactions.Extension):
         types = [element for element in rawTypes if element is not None]
 
         await ctx.send(self._chartCreator.getChartUrl(playerStats,playerData[2],types))
+    
+    @interactions.extension_command(
+        name="comparechart",
+        description="Custom chart des Spielers",
+        options =[
+            interactions.Option(
+                type=interactions.OptionType.STRING,
+                name="type",
+                description="Kategorie",
+                required=True,
+                choices=_customChartChoices,
+            ),
+            interactions.Option(
+                name="username1",
+                description="Pr0game Username1",
+                type=interactions.OptionType.STRING,
+                required=True
+            ),
+            interactions.Option(
+                name="username2",
+                description="Pr0game Username2",
+                type=interactions.OptionType.STRING,
+                required=True
+            ),
+            interactions.Option(
+                name="username3",
+                description="Pr0game Username3",
+                type=interactions.OptionType.STRING,
+                required=False
+            ),
+            interactions.Option(
+                name="username4",
+                description="Pr0game Username4",
+                type=interactions.OptionType.STRING,
+                required=False
+            ),
+            interactions.Option(
+                name="username5",
+                description="Pr0game Username5",
+                type=interactions.OptionType.STRING,
+                required=False
+            ),
+            interactions.Option(
+                name="username6",
+                description="Pr0game Username6",
+                type=interactions.OptionType.STRING,
+                required=False
+            ),
+            interactions.Option(
+                name="username7",
+                description="Pr0game Username7",
+                type=interactions.OptionType.STRING,
+                required=False
+            ),
+            interactions.Option(
+                name="username8",
+                description="Pr0game Username8",
+                type=interactions.OptionType.STRING,
+                required=False
+            )
+        ],
+    )
+    async def compareChart(self, ctx: interactions.CommandContext, type:str, username1:str, username2:str,
+                           username3:str=None, username4:str=None, username5:str=None, username6:str=None, username7:str=None, username8:str=None):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+
+        if not self._auth.check(ctx.user.id, "chart"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+
+        rawNames = [username1,username2,username3,username4,username5,username6,username7,username8]
+        #remove NONE from names
+        names = [element for element in rawNames if element is not None]
+
+        allPlayerStats = []
+        allPlayerNames = []
+        for playerName in names:
+            playerData = self._db.getPlayerData(playerName)
+            
+            if not playerData:
+                await ctx.send(f"{playerName} nicht gefunden")
+                return
+            allPlayerStats.append(self._db.getPlayerStats(playerData[1]))
+            allPlayerNames.append(playerData[2]) #to keep get original upper-/lowercase letters
+        
+
+        await ctx.send(self._chartCreator.getCompareChart(allPlayerStats,allPlayerNames,type))
     
 
 def setup(client, args):
