@@ -71,6 +71,8 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
+            - Mond Map
+            - Mond range (monde die einen Planeten scannen können)
             - \"Miner's Toolbox\"
             - Allianz Plazierung pro update ausrechnen und speichern
             - DB statistik (anzahl planeten,statseinträge,...)

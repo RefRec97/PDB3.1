@@ -242,6 +242,20 @@ class DB():
         
         return self._read(sql,())
 
+    def getAlliancePlanets(self, allianceId:str):
+        sql = """SELECT 
+            PLAYER."playerName",
+            PLAYER."playerId",
+            PLANET."galaxy",
+            PLANET."system",
+            PLANET."position",
+            PLANET."moon"
+        FROM PUBLIC."player"
+        INNER JOIN PUBLIC."planet" ON PLANET."playerId" = PLAYER."playerId"
+        WHERE PLAYER."allianceId" = %s"""
+
+        return self._read(sql,(allianceId,))
+
     def setResearchAttack(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(
             "playerId", "weapon", "shield", "armor")

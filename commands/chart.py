@@ -74,7 +74,7 @@ class Chart(interactions.Extension):
         await ctx.send(chartUrl)
     
     @interactions.extension_command(
-        name="customchart",
+        name="custom_chart",
         description="Custom chart des Spielers",
         options =[
             interactions.Option(
@@ -164,7 +164,7 @@ class Chart(interactions.Extension):
         await ctx.send(self._chartCreator.getChartUrl(playerStats,playerData[2],types))
     
     @interactions.extension_command(
-        name="comparechart",
+        name="compare_chart",
         description="Custom chart des Spielers",
         options =[
             interactions.Option(

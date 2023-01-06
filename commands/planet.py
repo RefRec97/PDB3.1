@@ -63,7 +63,7 @@ class Planet(interactions.Extension):
         await ctx.send(embeds=statsEmbed, components=statsButtons)
 
     @interactions.extension_command(
-        name="delplanet",
+        name="del_planet",
         description="Löscht ein Planet",
         options = [
             interactions.Option(
@@ -96,7 +96,7 @@ class Planet(interactions.Extension):
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
         
-        if not self._auth.check(ctx.user.id, ctx.command.name):
+        if not self._auth.check(ctx.user.id, "planet"):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
@@ -190,7 +190,7 @@ class Planet(interactions.Extension):
         await ctx.send(embeds=moonEmbed)
 
     @interactions.extension_command(
-        name="delmoon",
+        name="del_moon",
         description="Speichert ein Mond",
         options = [
             interactions.Option(
@@ -223,7 +223,7 @@ class Planet(interactions.Extension):
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
-        if not self._auth.check(ctx.user.id, ctx.command.name):
+        if not self._auth.check(ctx.user.id, "moon"):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
@@ -292,7 +292,7 @@ class Planet(interactions.Extension):
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
-        if not self._auth.check(ctx.user.id, ctx.command.name):
+        if not self._auth.check(ctx.user.id, "moon"):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
@@ -321,6 +321,74 @@ class Planet(interactions.Extension):
         )
         await ctx.send(embeds=moonEmbed)
 
+    @interactions.extension_command(
+        name="alliance_position",
+        description="Planetenpositionen der Allianz",
+        options = [
+            interactions.Option(
+                name="alliancename",
+                description="Allianz Name",
+                type=interactions.OptionType.STRING,
+                required=True
+            ),
+        ],
+    )
+    async def alliancePosition(self, ctx: interactions.CommandContext, alliancename:str = None):
+        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.debug("Alliance name: %s", alliancename)
+
+        if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+
+        allianceData = self._db.getAlliance(alliancename)
+        if not allianceData:
+            await ctx.send(f"Allianz {alliancename} nicht gefunden")
+            return
+        
+        alliancePlanets = self._db.getAlliancePlanets(allianceData[1])
+        
+        alliancePlanets
+        planetEmbed = interactions.Embed(
+            title= "Planeten Positionen",
+            description= allianceData[2],
+            fields= self._getAlliancePlanetFields(alliancePlanets)
+        )
+        await ctx.send(embeds=planetEmbed)
+
+    def _getAlliancePlanetFields(self,alliancePlanets):
+        sortedPlanets = sorted(alliancePlanets, key = lambda x: (x[2], x[3], x[4]))
+
+        planetFields = []
+        fieldValue = ""
+        for idx,planet in enumerate(sortedPlanets):
+            
+            if idx%10 == 0 and fieldValue:
+                planetFields.append(
+                    interactions.EmbedField(
+                        name="Position",
+                        value=fieldValue,
+                        inline=True
+                    )
+                )
+                fieldValue = ""
+            
+            fieldValue += f"{planet[2]}\:{planet[3]}\:{planet[4]}"
+            if planet[5]: 
+                fieldValue += " :new_moon:"
+            fieldValue+="\n"
+        
+        #Add not fully filled Field (if exist)
+        if fieldValue:
+            planetFields.append(
+                interactions.EmbedField(
+                    name="Position",
+                    value=fieldValue,
+                    inline=True
+                )
+            )
+        
+        return planetFields
 
 def setup(client, args):
     Planet(client, args)
