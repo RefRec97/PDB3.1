@@ -6,6 +6,7 @@ from utils.db import DB
 from utils.update import Update
 from utils.chartCreator import ChartCreator
 from utils.statsCreator import StatsCreator
+from utils.notify import Notify
 import config
 
 
@@ -21,26 +22,33 @@ def main():
     logger = logging.getLogger(__name__)
 
     logger.info("Startup")
-    #Utils
-    db = DB(prod = True)
-    update = Update(db)
-    authroization = Authorization(db)
-    chartCreator = ChartCreator(db)
-    statsCreator = StatsCreator(db, chartCreator)
     
     #Create Bot
     client = interactions.Client(token=config.prodToken)
 
+    #Utils
+    db = DB(prod = True)
+    notify = Notify(client, db)
+    update = Update(db, notify)
+    authroization = Authorization(db)
+    chartCreator = ChartCreator(db)
+    statsCreator = StatsCreator(db, chartCreator)
+
     #Load Commands
-    client.load("commands.utils", args=(authroization, update))
+    client.load("commands.utils", args=(authroization, update, notify))
     client.load("commands.auth", args=(authroization))
     client.load("commands.stats", args=(authroization, db, statsCreator, chartCreator))
     client.load("commands.planet", args=(authroization, db, statsCreator))
     client.load("commands.chart", args=(authroization, db, chartCreator))
-
+    client.load("commands.manageNotify", args=(authroization, db))
 
     #Start Bot
     logger.info("Initialization complete, starting client")
+    
+    @client.event
+    async def on_start():
+        await notify.notify("Ich Online")
+
     client.start()
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import interactions
 import logging
 from utils.authorisation import Authorization
 from utils.update import Update
+from utils.notify import Notify
 import config
 
 class Bot(interactions.Extension):
@@ -12,6 +13,7 @@ class Bot(interactions.Extension):
         self._client: interactions.Client = client
         self._auth:Authorization = args[0]
         self._update:Update = args[1]
+        self._notify:Notify = args[2]
 
     @interactions.extension_command(
         name="shutdown",
@@ -28,6 +30,7 @@ class Bot(interactions.Extension):
 
         self._update.stop()
         await ctx.send("Schlafenszeit zZz")
+        await self._notify.notify("Ich bin Offline (planmäsig)")
         await self._client._stop()
 
     @interactions.extension_command(
@@ -44,7 +47,7 @@ class Bot(interactions.Extension):
             return
         
         await ctx.send("Starte Update")
-        self._update.force()
+        await self._update.force()
         await ctx.message.edit("Update Complete")
     
     @interactions.extension_command(
@@ -71,6 +74,9 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
+            - Notification Service bei Events
+                - Mond und nun in reichweite
+                - Anmeldbar (private/public nachricht)
             - Mond Map
             - Mond range (monde die einen Planeten scannen können)
             - \"Miner's Toolbox\"

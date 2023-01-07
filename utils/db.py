@@ -255,6 +255,26 @@ class DB():
         WHERE PLAYER."allianceId" = %s"""
 
         return self._read(sql,(allianceId,))
+    
+    def getNotifyChannel(self, channelId:str):
+        sql = """SELECT "channelId"
+	        FROM public.notify
+            WHERE notify."channelId" = %s"""
+
+        return self._readOne(sql,(channelId,))
+
+    def getAllNotifyChannels(self):
+        sql = """SELECT "channelId"
+	        FROM public.notify;"""
+
+        return self._read(sql,())
+
+    def setNotifyChannel(self, channelId:str):
+        sql = """INSERT INTO public.notify(
+            "channelId")
+            VALUES (%s);"""
+
+        self._write(sql,(channelId,))
 
     def setResearchAttack(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(
