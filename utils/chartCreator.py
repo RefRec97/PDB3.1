@@ -535,7 +535,10 @@ class ChartCreator():
                     {
                         "id": "lowAxis",
                         "display": True,
-                        "position": "left"
+                        "position": "left",
+                        "ticks": {
+                            "beginAtZero": True
+                        }
                     }
                 )
         return result
