@@ -37,10 +37,8 @@ class Update():
         min = datetime.now().minute
 
         #Run every 6 hours 
-        if hour == 22:
-            if min == 4:
-        # if hour%6 == 0:
-        #     if min == 5 : #add+ (5 minute offset)
+        if hour%6 == 0:
+            if min == 5 : #add+ (5 minute offset)
                 #check if already run this hour
                 if not self._done:
                     self._logger.debug("Update timeslot start: %s:%s",hour,min)
