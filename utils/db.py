@@ -256,25 +256,40 @@ class DB():
 
         return self._read(sql,(allianceId,))
     
-    def getNotifyChannel(self, channelId:str):
-        sql = """SELECT "channelId"
+    def getNotify(self, id:str, type:str):
+        sql = """SELECT "id",
+            "type",
+            "guildId"
 	        FROM public.notify
-            WHERE notify."channelId" = %s"""
+            WHERE notify."id" = %s
+            AND notify."type" = %s;"""
 
-        return self._readOne(sql,(channelId,))
+        return self._read(sql,(id,type,))
+    
+    def getNotifyByType(self, type:str):
+        sql = """SELECT "id",
+            "type",
+            "guildId"
+	        FROM public.notify
+            WHERE notify."type" = %s;"""
 
-    def getAllNotifyChannels(self):
-        sql = """SELECT "channelId"
-	        FROM public.notify;"""
+        return self._read(sql,(type,))
 
+    def getScoreForExpo(self):
+        sql = """SELECT STATS."score"
+            FROM PUBLIC."stats"
+            WHERE STATS."rank" = 1
+            ORDER BY STATS."timestamp" DESC
+            LIMIT 2"""
+        
         return self._read(sql,())
 
-    def setNotifyChannel(self, channelId:str):
+    def setNotify(self, channelId:str, type:str, guildID:str=None):
         sql = """INSERT INTO public.notify(
-            "channelId")
-            VALUES (%s);"""
+            "id", "type", "guildId")
+            VALUES (%s,%s,%s);"""
 
-        self._write(sql,(channelId,))
+        self._write(sql,(channelId,type,guildID))
 
     def setResearchAttack(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(

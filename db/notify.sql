@@ -5,9 +5,11 @@
 CREATE TABLE IF NOT EXISTS public.notify
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
-    "channelId" text COLLATE pg_catalog."default",
+    id text COLLATE pg_catalog."default",
+    type character(1) COLLATE pg_catalog."default",
+    "guildId" text COLLATE pg_catalog."default",
     CONSTRAINT notify_pkey PRIMARY KEY ("dbKey"),
-    CONSTRAINT channel_unique UNIQUE ("channelId")
+    CONSTRAINT id_type_unique UNIQUE (id, type)
 )
 
 TABLESPACE pg_default;

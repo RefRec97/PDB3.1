@@ -30,7 +30,7 @@ class Bot(interactions.Extension):
 
         self._update.stop()
         await ctx.send("Schlafenszeit zZz")
-        await self._notify.notify("Ich bin Offline (planmäsig)")
+        await self._notify.notify(Notify.CHANNEL, "Ich bin Offline (planmäsig)")
         await self._client._stop()
 
     @interactions.extension_command(

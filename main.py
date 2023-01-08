@@ -47,7 +47,7 @@ def main():
     
     @client.event
     async def on_start():
-        await notify.notify("Ich Online")
+        await notify.notify(Notify.CHANNEL, "Ich Online")
 
     client.start()
 

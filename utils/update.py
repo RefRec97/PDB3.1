@@ -28,7 +28,9 @@ class Update():
         self._timer.cancel()
 
     async def force(self):
+        #update evrything here
         await self._updateStats()
+        await self._checkExpoCap()
         
 
     async def _tick(self):
@@ -46,16 +48,41 @@ class Update():
                     
                     #update evrything here
                     await self._updateStats()
+                    await self._checkExpoCap()
         else:
             self._done = False
         
         #restart Timer
         self._timer = Timer(10, self._tick)
 
+    async def _checkExpoCap(self):
+        self._logger.info("Checking expo cap")
+        scoreCap = [
+            100000,
+            1000000,
+            5000000,
+            25000000,
+            50000000,
+            75000000,
+            100000000
+        ]
+
+
+        lastTopScores = self._db.getScoreForExpo()
+        current = lastTopScores[0][0]
+        last = lastTopScores[1][0]
+        
+        for score in scoreCap:
+            if last < score and current >= score:
+                await self._notify.notify(Notify.EXPO_SIZE, "Info: Expo cap ist erhöht")
+
     
     async def _updateStats(self):
         self._logger.info("Starting Update")
-        await self._notify.notify("Lade Stats Update")
+        try:
+            await self._notify.notify(Notify.CHANNEL, "Lade Stats Update")
+        except:
+            pass
        
         players = []
         with urllib.request.urlopen("https://pr0game.com/stats_Universe_2.json") as url:
@@ -72,10 +99,15 @@ class Update():
 
                 players.append(player)  
 
-        self._db.setStats(players)
+        #self._db.setStats(players)
         
         self._logger.info("Update complete")
-        await self._notify.notify("Update geladen")
+
+        try:
+            await self._notify.notify(Notify.CHANNEL, "Update geladen")
+        except:
+            pass
+        
         
 
 
