@@ -99,7 +99,7 @@ class Update():
 
                 players.append(player)  
 
-        #self._db.setStats(players)
+        self._db.setStats(players)
         
         self._logger.info("Update complete")
 
