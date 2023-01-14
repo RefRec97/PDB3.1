@@ -48,9 +48,15 @@ class ManageNotify(interactions.Extension):
                     interactions.Choice(name="Sensor Phalanx reichweite", value=Notify.SENSOR_PHALANX)
                 ]
             ),
+            interactions.Option(
+                name="username",
+                description="Pr0game Username",
+                type=interactions.OptionType.STRING,
+                required=True
+            )
         ]
     )
-    async def add_notify(self, ctx: interactions.CommandContext, type:str):
+    async def add_notify(self, ctx: interactions.CommandContext, type:str, username:str=None):
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
@@ -62,7 +68,13 @@ class ManageNotify(interactions.Extension):
             await ctx.send(f"{ctx.user.mention} Bereits registriert", ephemeral=True)
             return
         
-        self._db.setNotify(str(ctx.user.id), type, str(ctx.guild.id))
+        if type == Notify.SENSOR_PHALANX:
+            playerData = self._db.getPlayerData(username)
+            if not playerData:
+                await ctx.send("Progame username nicht gefunden")
+                return
+        
+        self._db.setNotify(str(ctx.user.id), type, str(ctx.guild.id), playerData[1])
 
         await ctx.send(f"Im Verteiler aufgenommen {ctx.user.mention}")
     

@@ -269,7 +269,8 @@ class DB():
     def getNotifyByType(self, type:str):
         sql = """SELECT "id",
             "type",
-            "guildId"
+            "guildId",
+            "playerId"
 	        FROM public.notify
             WHERE notify."type" = %s;"""
 
@@ -284,12 +285,12 @@ class DB():
         
         return self._read(sql,())
 
-    def setNotify(self, channelId:str, type:str, guildID:str=None):
+    def setNotify(self, channelId:str, type:str, guildID:str=None, playerId:str=None):
         sql = """INSERT INTO public.notify(
-            "id", "type", "guildId")
-            VALUES (%s,%s,%s);"""
+            "id", "type", "guildId", "playerId")
+            VALUES (%s,%s,%s,%s);"""
 
-        self._write(sql,(channelId,type,guildID))
+        self._write(sql,(channelId,type,guildID, playerId))
 
     def setResearchAttack(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(

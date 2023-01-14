@@ -74,6 +74,7 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
+            - Löschen von alten Userdaten
             - Notification Service bei Events
                 - Mond und nun in reichweite
                 - Anmeldbar (private/public nachricht)

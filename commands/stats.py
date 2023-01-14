@@ -354,38 +354,133 @@ class Stats(interactions.Extension):
         description="Potentiell inaktive Spieler",
         options = [
             interactions.Option(
-                name="lowerlimit",
+                name="galaxy",
+                description="Galaxy",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            ),
+            interactions.Option(
+                name="lower_system",
+                description="Unteres System Limit",
+                type=interactions.OptionType.INTEGER,
+                required=False
+            ),
+            interactions.Option(
+                name="upper_system",
+                description="Oberes System Limit",
+                type=interactions.OptionType.INTEGER,
+                required=False
+            ),
+            interactions.Option(
+                name="point_limit",
                 description="Unteres Punkte Limit",
                 type=interactions.OptionType.INTEGER,
                 required=False
             ),
         ],
     )
-    async def inactive(self, ctx: interactions.CommandContext, lowerlimit:int = 1000):
+    @interactions.autodefer(delay=10)
+    async def inactive(self, ctx: interactions.CommandContext, galaxy:int, lower_system:int=0, upper_system:int=400, point_limit:int=10000):
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
+        
+        if galaxy < 0 or galaxy > 4:
+            await ctx.send("Galaxy muss zwischen 1 und 4 liegen", ephemeral=True)
+            return
+        
+        if lower_system < 0 or upper_system > 400:
+            await ctx.send("Systeme müssen zwischen 0 und 400 liegen", ephemeral=True)
+            return
+        
+        if point_limit < 0:
+            await ctx.send("Unteres Punkte Limit muss positiv sein", ephemeral=True)
+            return
+
+        if lower_system > upper_system:
+            lower_system, upper_system = upper_system, lower_system
 
         playerData = self._db.getCurrentPlayerData()
 
         #Group Data by playerId
         groupedData = {}
         for datapoint in playerData:
+            playerId = datapoint[1]
             if not datapoint[1] in groupedData:
-                groupedData[datapoint[1]] = {
+                groupedData[playerId] = {
                     "playerName": datapoint[0],
-                    "userId": datapoint[1],
+                    "playerId": playerId,
                     "scores": [],
                 }
-            groupedData[datapoint[1]]["scores"].append(datapoint[2])
+            groupedData[playerId]["scores"].append(datapoint[2])
 
-        inactiveEmbed,inactiveComponent = self._getInactiveContent(groupedData, lowerlimit)
+        await ctx.send(embeds=interactions.Embed(title="Working",description="..."))
 
-        await ctx.send(embeds=inactiveEmbed, components=inactiveComponent)     
+        inactivePlayer = self._getInactivePlayer(groupedData, point_limit)
+        resultData = self._getInactivePlayerPlanets(inactivePlayer, galaxy, lower_system, upper_system) 
+        embed = self._getInactiveEmbed(resultData, galaxy, lower_system, upper_system, point_limit)
 
+        await ctx.edit(embeds=embed)
 
-    def _getInactiveContent(self, inactiveData:dict, lowerLimit:int):
+    def _getInactiveEmbed(self, planetData, galaxy:int, lowerSystem:int, upperSystem:int, lowerLimit:int):
+        planetData.sort(key=lambda element: (element["system"], element["position"]))
+
+        lastSystem = planetData[0]["system"]
+        fields = []
+        fieldValue=""
+        for idx,planet in enumerate(planetData):
+            if idx%10 == 0 and fieldValue:
+                fields.append(
+                        interactions.EmbedField(
+                        inline=True,
+                        name=f"{lastSystem}-{planet['system']}",
+                        value=fieldValue
+                    )
+                )
+                fieldValue = ""
+                lastSystem = planet["system"]
+            fieldValue += f"[{planet['galaxy']}:{planet['system']}:{planet['position']}]\n"
+
+        #append partally filled Field
+        if fieldValue:
+            fields.append(
+                interactions.EmbedField(
+                    inline=True,
+                    name=f"{lastSystem}-{planet['system']}",
+                    value=fieldValue
+                )
+            )
+
+        embed = interactions.Embed(
+            title=f"Potentiell Inaktive Spieler",
+            description= f"Galaxy: {galaxy}\nSysteme:{lowerSystem} - {upperSystem}\nPunkte > {self._statsCreator.formatNumber(lowerLimit)}",
+            fields = fields
+        )
+        return embed
+
+    def _getInactivePlayerPlanets(self, inactivePlayer, galaxy:int, lowerSystem:int, upperSystem:int):
+        planets = []
+        for player in inactivePlayer:
+            playerId = player["playerId"]
+            playerName = player["playerName"]
+            
+            for planet in self._db.getPlayerPlanets(playerId):
+                if planet[2] == galaxy and planet[3] >= lowerSystem and planet[3] <= upperSystem:
+                    planets.append(
+                        {
+                            "playerId": playerId,
+                            "playerName": playerName,
+                            "galaxy": planet[2],
+                            "system": planet[3],
+                            "position": planet[4],
+                            "moon":planet[5]
+                        }
+                    )
+        
+        return planets
+
+    def _getInactivePlayer(self, inactiveData:dict, lowerLimit:int):
         inactivePlayers = []
         for playerData in inactiveData.values():
             count = 0
@@ -398,43 +493,15 @@ class Stats(interactions.Extension):
                     break
                 
                 if count >= 4:
-                    inactivePlayers.append(playerData)
+                    inactivePlayers.append(
+                        {
+                            "playerName": playerData["playerName"],
+                            "playerId": playerData["playerId"]
+                        }
+                    )
                     break
         
-        inactiveEmbed = interactions.Embed(
-            title= f"Inaktive Spieler ",
-            description= f"Punkte > {lowerLimit}",
-            fields=self._getInactiveEmbedFields(inactivePlayers)
-        )
-        return (inactiveEmbed,None)
-
-    def _getInactiveEmbedFields(self,inactivePlayers):
-        inactiveFields = []
-        fieldValue = ""
-        for idx,inactivePlayer in enumerate(inactivePlayers):
-            if idx%10 == 0 and fieldValue:
-                inactiveFields.append(
-                    interactions.EmbedField(
-                        name="Name",
-                        value=fieldValue,
-                        inline=True
-                    )
-                )
-                fieldValue = ""
-            
-            fieldValue+=inactivePlayer["playerName"] + "\n"
-        
-        #Add not fully filled Field (if exist)
-        if fieldValue:
-            inactiveFields.append(
-                interactions.EmbedField(
-                    name="Name",
-                    value=fieldValue,
-                    inline=True
-                )
-            )
-            
-        return inactiveFields
+        return inactivePlayers
 
     def _getAllianceContent(self,allianceName:str):
         allianceData = self._db.getAlliance(allianceName)
