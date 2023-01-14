@@ -127,7 +127,7 @@ class StatsCreator():
 
         planetData.sort(key=lambda element: (element[2], element[3], element[4]))
         for planet in planetData:
-            planetEmbeds[0].value += f"{planet[2]}\:{planet[3]}\:{planet[4]}\n"
+            planetEmbeds[0].value += f"[{planet[2]}\:{planet[3]}\:{planet[4]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={planet[2]}&system={planet[3]})\n"
             
             value = "-"
             if planet[5]:

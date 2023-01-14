@@ -440,7 +440,7 @@ class Stats(interactions.Extension):
                 )
                 fieldValue = ""
                 lastSystem = planet["system"]
-            fieldValue += f"[{planet['galaxy']}:{planet['system']}:{planet['position']}]\n"
+            fieldValue += f"[[{planet['galaxy']}:{planet['system']}:{planet['position']}]](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={planet['galaxy']}&system={planet['system']})\n"
 
         #append partally filled Field
         if fieldValue:
