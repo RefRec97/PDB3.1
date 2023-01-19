@@ -17,7 +17,7 @@ def main():
         filename= datetime.datetime.now().strftime("%Y-%m-%d_%H-%M.log"),
         encoding='utf-8',
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=logging.DEBUG
+        level=logging.INFO
     )
     logger = logging.getLogger(__name__)
 
