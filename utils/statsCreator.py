@@ -87,7 +87,7 @@ class StatsCreator():
             ),
             interactions.Button(
                 style=interactions.ButtonStyle.PRIMARY,
-                label='Triebwersforschung ändern',
+                label='Triebwerksforschung ändern',
                 custom_id='btn_research_drive'
             ),
             interactions.Button(
