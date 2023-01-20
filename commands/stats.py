@@ -30,18 +30,19 @@ class Stats(interactions.Extension):
         ],
     )
     async def stats(self, ctx: interactions.CommandContext, username:str = None):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Username: %s", username)
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
-        
-        statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
-        
-
-        #await ctx.send(f"{username} nicht gefunden")
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
         
         await ctx.send(embeds=statsEmbed, components=statsComponent)
 
@@ -49,21 +50,28 @@ class Stats(interactions.Extension):
     #Refresh Button
     @interactions.extension_component("btn_reload")
     async def btn_reload(self, ctx:interactions.ComponentContext):
-        self._logger.debug("Button clicked: btn_alliance from %s", ctx.user.username)
+        self._logger.info("Button clicked: btn_alliance from %s", ctx.user.username)
         if not self._auth.check(ctx.user.id, "alliance"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
-        #Workaround get playerName from Title
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        try:
+            #Workaround get playerName from Title
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
 
         #Update
-        await ctx.edit(embeds=statsEmbed, components=statsButtons)
+        await ctx.edit(embeds=statsEmbed, components=statsComponent)
 
     #Alliance Button
     @interactions.extension_component("btn_alliance")
     async def btn_alliance(self, ctx:interactions.ComponentContext):   
         self._logger.debug("Button clicked: btn_alliance from %s", ctx.user.username)
         if not self._auth.check(ctx.user.id, "alliance"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
         #Get Alliance Name from Description
@@ -78,9 +86,10 @@ class Stats(interactions.Extension):
     #Planet Modal
     @interactions.extension_component("btn_planet")
     async def modal_planet(self, ctx:interactions.ComponentContext):      
-        self._logger.debug("Button clicked: btn_planet from %s", ctx.user.username)
+        self._logger.info("Button clicked: btn_planet from %s", ctx.user.username)
 
         if not self._auth.check(ctx.user.id, "planet"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
         planetModal = interactions.Modal(
@@ -121,10 +130,11 @@ class Stats(interactions.Extension):
     #Confirm Planet Modal
     @interactions.extension_modal("modal_planet")
     async def modal_planet_save(self, ctx:interactions.ComponentContext, galaxy:str, system:str, position:str):
-        self._logger.debug("Modal Confirmed from: %s", ctx.user.username)
+        self._logger.info("Modal Confirmed from: %s", ctx.user.username)
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
         if not self._auth.check(ctx.user.id, "planet"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
         #Workaround get PlayerId from Description
@@ -132,20 +142,27 @@ class Stats(interactions.Extension):
 
         self._db.setPlanet(playerId, galaxy ,system, position)
 
-        #Workaround get playerName from Title
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        
+        try:
+            #Workaround get playerName from Title
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
 
         #edit original message
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         #confirm modal
         await ctx.send()
 
     #Attack research Modal
     @interactions.extension_component("btn_research_attack")
     async def modal_research_attack(self, ctx:interactions.ComponentContext):      
-        self._logger.debug("Button clicked: btn_research_attack from %s", ctx.user.username)
+        self._logger.info("Button clicked: btn_research_attack from %s", ctx.user.username)
 
         if not self._auth.check(ctx.user.id, "research"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
         #Workaround get PlayerId from Description
@@ -193,10 +210,11 @@ class Stats(interactions.Extension):
     #Confirm Attack Research Modal
     @interactions.extension_modal("modal_research_attack")
     async def modal_research_attack_save(self, ctx:interactions.ComponentContext, weapon:str, shield:str, armor:str):
-        self._logger.debug("Modal Confirmed from: %s", ctx.user.username)
+        self._logger.info("Modal Confirmed from: %s", ctx.user.username)
         self._logger.debug("Arguments: %s", str((weapon,shield,armor)))
 
         if not self._auth.check(ctx.user.id, "research"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
         #Workaround get PlayerId from Description
@@ -204,20 +222,26 @@ class Stats(interactions.Extension):
 
         self._db.setResearchAttack(playerId,weapon,shield,armor)
 
-        #Workaround get playerName from Title
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        try:
+            #Workaround get playerName from Title
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
 
         #edit original message
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         #confirm modal
         await ctx.send()
 
     #Drive research Modal
     @interactions.extension_component("btn_research_drive")
     async def modal_research_drive(self, ctx:interactions.ComponentContext):      
-        self._logger.debug("Button clicked: btn_research_drive from %s", ctx.user.username)
+        self._logger.info("Button clicked: btn_research_drive from %s", ctx.user.username)
 
         if not self._auth.check(ctx.user.id, "research"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
         #Workaround get PlayerId from Description
@@ -265,10 +289,11 @@ class Stats(interactions.Extension):
     #Confirm Drive Research Modal
     @interactions.extension_modal("modal_research_drive")
     async def modal_research_drive_save(self, ctx:interactions.ComponentContext, combustion:str, impulse:str, hyperspace:str):
-        self._logger.debug("Modal Confirmed from: %s", ctx.user.username)
+        self._logger.info("Modal Confirmed from: %s", ctx.user.username)
         self._logger.debug("Arguments: %s", str((combustion,impulse,hyperspace)))
 
         if not self._auth.check(ctx.user.id, "research"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
         #Workaround get PlayerId from Description
@@ -276,11 +301,16 @@ class Stats(interactions.Extension):
 
         self._db.setResearchDrive(playerId,combustion,impulse,hyperspace)
 
-        #Workaround get playerName from Title
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        try:
+            #Workaround get playerName from Title
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
 
         #edit original message
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         #confirm modal
         await ctx.send()
    
@@ -297,7 +327,7 @@ class Stats(interactions.Extension):
         ],
     )
     async def alliance(self, ctx: interactions.CommandContext, alliance:str = None):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("AllianceName: %s", alliance)
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
@@ -317,36 +347,66 @@ class Stats(interactions.Extension):
     #Alliance Player Select 1
     @interactions.extension_component("allianceplayerselect1")
     async def alliancePlayerSelect1(self, ctx:interactions.ComponentContext, value): 
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(value[0])
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+        
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         await ctx.send()
 
     #Alliance Player Select 2
     @interactions.extension_component("allianceplayerselect2")
     async def alliancePlayerSelect2(self, ctx:interactions.ComponentContext, value):
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(value[0])
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+        
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         await ctx.send()
 
     #Alliance Player Select 3
     @interactions.extension_component("allianceplayerselect3")
     async def alliancePlayerSelect3(self, ctx:interactions.ComponentContext, value): 
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(value[0])
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+        
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         await ctx.send()
 
     #Alliance Player Select 4
     @interactions.extension_component("allianceplayerselect4")
     async def alliancePlayerSelect4(self, ctx:interactions.ComponentContext, value): 
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(value[0])
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+        
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         await ctx.send()
 
     #Alliance Player Select 5
     @interactions.extension_component("allianceplayerselect5")
     async def alliancePlayerSelect5(self, ctx:interactions.ComponentContext, value): 
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(value[0])
-        await ctx.message.edit(embeds=statsEmbed, components=statsButtons)
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+        
+        await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         await ctx.send()
 
     @interactions.extension_command(
@@ -381,7 +441,8 @@ class Stats(interactions.Extension):
     )
     @interactions.autodefer(delay=10)
     async def inactive(self, ctx: interactions.CommandContext, galaxy:int, lower_system:int=0, upper_system:int=400, point_limit:int=10000):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+        
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return

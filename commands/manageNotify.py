@@ -19,7 +19,7 @@ class ManageNotify(interactions.Extension):
         description="Fügt den aktuellen Channel zum Nachrichtenverteiler hinzu"
     )
     async def add_notify_channel(self, ctx: interactions.CommandContext):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
@@ -27,7 +27,7 @@ class ManageNotify(interactions.Extension):
         
         existing = self._db.getNotify(str(ctx.channel.id),Notify.CHANNEL)
         if existing and existing[1] == Notify.CHANNEL:
-            await ctx.send(f"{ctx.channel.mention} bereits registriert")
+            await ctx.send(f"{ctx.channel.mention} bereits registriert", ephemeral=True)
             return
         
         self._db.setNotify(str(ctx.channel.id),Notify.CHANNEL)
@@ -71,7 +71,7 @@ class ManageNotify(interactions.Extension):
         if type == Notify.SENSOR_PHALANX:
             playerData = self._db.getPlayerData(username)
             if not playerData:
-                await ctx.send("Progame username nicht gefunden")
+                await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
                 return
         
         self._db.setNotify(str(ctx.user.id), type, str(ctx.guild.id), playerData[1])

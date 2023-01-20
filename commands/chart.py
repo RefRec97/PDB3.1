@@ -48,7 +48,7 @@ class Chart(interactions.Extension):
         ]
     )
     async def chart(self, ctx: interactions.CommandContext, username:str = None):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Username: %s", username)
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
@@ -57,6 +57,7 @@ class Chart(interactions.Extension):
 
         playerData = self._db.getPlayerData(username)
         if not playerData:
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return False
 
         playerStats = self._db.getPlayerStats(playerData[1])
@@ -143,7 +144,7 @@ class Chart(interactions.Extension):
     )
     async def customChart(self, ctx: interactions.CommandContext, username:str, type_1:str, type_2:str=None,
                             type_3:str=None, type_4:str=None, type_5:str=None, type_6:str=None, type_7:str=None, type_8:str=None):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Username: %s", username)
         
         if not self._auth.check(ctx.user.id, "chart"):
@@ -152,7 +153,7 @@ class Chart(interactions.Extension):
 
         playerData = self._db.getPlayerData(username)
         if not playerData:
-            await ctx.send(f"{username} nicht gefunden")
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return
         
         playerStats = self._db.getPlayerStats(playerData[1])
@@ -226,6 +227,7 @@ class Chart(interactions.Extension):
     )
     async def compareChart(self, ctx: interactions.CommandContext, type:str, username1:str, username2:str,
                            username3:str=None, username4:str=None, username5:str=None, username6:str=None, username7:str=None, username8:str=None):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
 
         if not self._auth.check(ctx.user.id, "chart"):
@@ -242,7 +244,7 @@ class Chart(interactions.Extension):
             playerData = self._db.getPlayerData(playerName)
             
             if not playerData:
-                await ctx.send(f"{playerName} nicht gefunden")
+                await ctx.send(f"Spieler nicht gefunden: {playerName}", ephemeral=True)
                 return
             allPlayerStats.append(self._db.getPlayerStats(playerData[1]))
             allPlayerNames.append(playerData[2]) #to keep get original upper-/lowercase letters

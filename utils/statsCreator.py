@@ -16,7 +16,7 @@ class StatsCreator():
     def getStatsContent(self, playerName:str):
         playerData = self._db.getPlayerData(playerName)
         if not playerData:
-            return False
+            raise ValueError(f"Spieler nicht gefunden: {playerName}")
         
         playerStats = self._db.getPlayerStats(playerData[1])
         allianceData = self._db.getAllianceById(playerData[5])

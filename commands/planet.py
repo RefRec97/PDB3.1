@@ -46,21 +46,32 @@ class Planet(interactions.Extension):
         ],
     )
     async def planet(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
-        if not self._auth.check(ctx.user.id, ctx.command.name):
-            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+        try:
+            self._checkValidPosition(galaxy,system,position)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
             return
 
-        #get userId
-        userId = self._db.getPlayerData(username)[1]
+        playerData = self._db.getPlayerData(username)
+        if not playerData:
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+            return
 
         #save planet
-        self._db.setPlanet(userId, galaxy, system, position)
+        self._db.setPlanet(playerData[1], galaxy, system, position)
         
-        statsEmbed,statsButtons = self._statsCreator.getStatsContent(username)
-        await ctx.send(embeds=statsEmbed, components=statsButtons)
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+        
+        await ctx.send(embeds=statsEmbed, components=statsComponent)
 
     @interactions.extension_command(
         name="del_planet",
@@ -93,18 +104,28 @@ class Planet(interactions.Extension):
         ],
     )
     async def delPlanet(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
         
         if not self._auth.check(ctx.user.id, "planet"):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
+        
+        try:
+            self._checkValidPosition(galaxy,system,position)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
 
         #get userId
-        userId = self._db.getPlayerData(username)[1]
+        playerData = self._db.getPlayerData(username)
+        if not playerData:
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+            return
 
         #check if planet exists
-        userPlanets = self._db.getPlayerPlanets(userId)
+        userPlanets = self._db.getPlayerPlanets(playerData[1])
 
         #Check and delete if found
         for planet in userPlanets:
@@ -113,19 +134,20 @@ class Planet(interactions.Extension):
                 planet[4] == position):
 
                 # delete planet
-                self._db.delPlanet(userId, galaxy, system, position)
+                self._db.delPlanet(playerData[1], galaxy, system, position)
 
-                statsEmbed,statsButtons = self._statsCreator.getStatsContent(username)
-                await ctx.send(embeds=statsEmbed, components=statsButtons)
+                try:
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+                except ValueError as err:
+                    self._logger.debug(err)
+                    await ctx.send(str(err), ephemeral=True)
+                    return
+
+                await ctx.send(embeds=statsEmbed, components=statsComponent)
                 return
 
         #No planet found
-        planetEmbed = interactions.Embed(
-            title="Kein Planet auf position",
-            description= f"{galaxy}:{system}:{position}",
-        )
-        await ctx.send(embeds=planetEmbed)
-        return
+        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
         name="moon",
@@ -158,36 +180,47 @@ class Planet(interactions.Extension):
         ],
     )
     async def moon(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
+        try:
+            self._checkValidPosition(galaxy,system,position)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+
         #get userId
-        userId = self._db.getPlayerData(username)[1]
+        playerData = self._db.getPlayerData(username)
+        if not playerData:
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+            return
 
         #check if planet exist
-        userPlanets = self._db.getPlayerPlanets(userId)
+        userPlanets = self._db.getPlayerPlanets(playerData[1])
 
         for planet in userPlanets:
             if (planet[2] == galaxy and 
                 planet[3] == system and 
                 planet[4] == position):
 
-                self._db.setMoon(userId,galaxy,system,position,True)
+                self._db.setMoon(playerData[1],galaxy,system,position,True)
 
-                statsEmbed,statsButtons = self._statsCreator.getStatsContent(username)
-                await ctx.send(embeds=statsEmbed, components=statsButtons)
+                try:
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+                except ValueError as err:
+                    self._logger.debug(err)
+                    await ctx.send(str(err), ephemeral=True)
+                    return
+                await ctx.send(embeds=statsEmbed, components=statsComponent)
                 return
 
         #No planet found
-        moonEmbed = interactions.Embed(
-            title="Kein Planet auf position",
-            description= f"{galaxy}:{system}:{position}",
-        )
-        await ctx.send(embeds=moonEmbed)
+        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
         name="del_moon",
@@ -220,18 +253,27 @@ class Planet(interactions.Extension):
         ],
     )
     async def delMoon(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
         if not self._auth.check(ctx.user.id, "moon"):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
+        
+        try:
+            self._checkValidPosition(galaxy,system,position)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
 
-        #get userId
-        userId = self._db.getPlayerData(username)[1]
+        playerData = self._db.getPlayerData(username)
+        if not playerData:
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+            return
 
         #check if planet exist
-        userPlanets = self._db.getPlayerPlanets(userId)
+        userPlanets = self._db.getPlayerPlanets(playerData[1])
 
         for planet in userPlanets:
             if (planet[2] == galaxy and 
@@ -239,18 +281,19 @@ class Planet(interactions.Extension):
                 planet[4] == position and
                 planet[5]):
 
-                self._db.setMoon(userId,galaxy,system,position,False)
+                self._db.setMoon(playerData[1],galaxy,system,position,False)
 
-                statsEmbed,statsButtons = self._statsCreator.getStatsContent(username)
-                await ctx.send(embeds=statsEmbed, components=statsButtons)
+                try:
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+                except ValueError as err:
+                    self._logger.debug(err)
+                    await ctx.send(str(err), ephemeral=True)
+                    return
+                await ctx.send(embeds=statsEmbed, components=statsComponent)
                 return
 
-        #No planet/moon found
-        moonEmbed = interactions.Embed(
-            title="Kein Planet/Mond auf position",
-            description= f"{galaxy}:{system}:{position}",
-        )
-        await ctx.send(embeds=moonEmbed)
+        #No planet found
+        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
         name="sensor",
@@ -289,18 +332,27 @@ class Planet(interactions.Extension):
         ],
     )
     async def sensor(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
         if not self._auth.check(ctx.user.id, "moon"):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
+        
+        try:
+            self._checkValidPosition(galaxy,system,position)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
 
-        #get userId
-        userId = self._db.getPlayerData(username)[1]
+        playerData = self._db.getPlayerData(username)
+        if not playerData:
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+            return
 
         #check if planet exist
-        userPlanets = self._db.getPlayerPlanets(userId)
+        userPlanets = self._db.getPlayerPlanets(playerData[1])
 
         for planet in userPlanets:
             if (planet[2] == galaxy and 
@@ -308,18 +360,19 @@ class Planet(interactions.Extension):
                 planet[4] == position and
                 planet[5]):
 
-                self._db.setSensor(userId,galaxy,system,position,level)
+                self._db.setSensor(playerData[1],galaxy,system,position,level)
 
-                statsEmbed,statsButtons = self._statsCreator.getStatsContent(username)
-                await ctx.send(embeds=statsEmbed, components=statsButtons)
+                try:
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+                except ValueError as err:
+                    self._logger.debug(err)
+                    await ctx.send(str(err), ephemeral=True)
+                    return
+                await ctx.send(embeds=statsEmbed, components=statsComponent)
                 return
 
         #No planet/moon found
-        moonEmbed = interactions.Embed(
-            title="Kein Planet/Mond auf position",
-            description= f"{galaxy}:{system}:{position}",
-        )
-        await ctx.send(embeds=moonEmbed)
+        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
         name="alliance_position",
@@ -334,7 +387,7 @@ class Planet(interactions.Extension):
         ],
     )
     async def alliancePosition(self, ctx: interactions.CommandContext, alliancename:str = None):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Alliance name: %s", alliancename)
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
@@ -348,7 +401,6 @@ class Planet(interactions.Extension):
         
         alliancePlanets = self._db.getAlliancePlanets(allianceData[1])
         
-        alliancePlanets
         planetEmbed = interactions.Embed(
             title= "Planeten Positionen",
             description= allianceData[2],
@@ -389,6 +441,19 @@ class Planet(interactions.Extension):
             )
         
         return planetFields
+
+    def _checkValidPosition(self, galaxy:int, system:int, position:int):
+        
+        if galaxy < 1 or galaxy > 4:
+            raise ValueError("Galaxy muss zwischen 1 und 4 liegen")
+        
+        elif system < 1 or system > 400:
+            raise ValueError("System muss zwischen 1 und 400 liegen")
+        
+        elif position < 1 or position > 15:
+            raise ValueError("Position muss zwischen 1 und 15 liegen")
+
+        return
 
 def setup(client, args):
     Planet(client, args)

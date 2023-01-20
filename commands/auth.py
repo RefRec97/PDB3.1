@@ -30,7 +30,7 @@ class Auth(interactions.Extension):
         scope=config.devDiscordId
     )
     async def admin(self, ctx: interactions.CommandContext, user:interactions.User):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Target: %s", str(user.username))
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
@@ -56,7 +56,7 @@ class Auth(interactions.Extension):
         scope=config.devDiscordId
     )
     async def auth(self, ctx: interactions.CommandContext, user:interactions.User):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Target: %s", str(user.username))
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
@@ -73,7 +73,7 @@ class Auth(interactions.Extension):
         description="Authorisiert diesen Nutzer für den Bot"
     )
     async def authContext(self, ctx: interactions.CommandContext):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Target: %s", str(ctx.target.user.username))
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
