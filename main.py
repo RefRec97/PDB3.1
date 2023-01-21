@@ -38,7 +38,7 @@ def main():
     client.load("commands.utils", args=(authroization, update, notify))
     client.load("commands.auth", args=(authroization))
     client.load("commands.stats", args=(authroization, db, statsCreator, chartCreator))
-    client.load("commands.planet", args=(authroization, db, statsCreator))
+    client.load("commands.planet", args=(authroization, db, statsCreator, notify))
     client.load("commands.chart", args=(authroization, db, chartCreator))
     client.load("commands.manageNotify", args=(authroization, db))
 

@@ -3,6 +3,7 @@ import logging
 from utils.authorisation import Authorization
 from utils.db import DB
 from utils.statsCreator import StatsCreator
+from utils.notify import Notify
 
 class Planet(interactions.Extension):
     def __init__(self, client, args):
@@ -13,6 +14,7 @@ class Planet(interactions.Extension):
         self._auth:Authorization = args[0]
         self._db:DB = args[1]
         self._statsCreator:StatsCreator = args[2]
+        self._notify:Notify = args[3]
     
     
     @interactions.extension_command(
@@ -359,7 +361,8 @@ class Planet(interactions.Extension):
                 planet[3] == system and 
                 planet[4] == position and
                 planet[5]):
-
+                
+                await self._notify.checkSensor(planet,level)
                 self._db.setSensor(playerData[1],galaxy,system,position,level)
 
                 try:

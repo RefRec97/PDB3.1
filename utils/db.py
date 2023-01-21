@@ -169,8 +169,16 @@ class DB():
         return self._readOne(sql,(allianceId,))
 
     def getPlayerPlanets(self, playerId:str):
-        sql = """SELECT * FROM public.planet
-	        WHERE planet."playerId" = %s"""
+        sql = """ SELECT "dbKey",
+            "playerId",
+            GALAXY,
+            SYSTEM,
+            "position",
+            MOON,
+            "sensorPhalanx",
+            "timestamp"
+        FROM PUBLIC.PLANET
+        WHERE planet."playerId" = %s"""
 
         return self._read(sql,(playerId,))
 
