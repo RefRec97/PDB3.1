@@ -140,8 +140,7 @@ class Stats(interactions.Extension):
         #Workaround get PlayerId from Description
         playerId = ctx.message.embeds[0].description.split('\n')[0] 
 
-        self._db.setPlanet(playerId, galaxy ,system, position)
-
+        self._db.updatePlanet(galaxy,system,position,playerId)
         
         try:
             #Workaround get playerName from Title

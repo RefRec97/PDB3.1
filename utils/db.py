@@ -187,14 +187,18 @@ class DB():
             WHERE lower(player."playerName")=lower(%s)"""
 
         return self._readOne(sql,(userName,))
-
-    def delPlanet(self, playerId:str, galaxy:int, system:int, position:int):
-        sql = """DELETE FROM public.planet
-            WHERE planet."playerId" = %s AND
-                planet."galaxy" = %s AND
-                planet."system" = %s AND
-                planet."position" = %s;"""
-
+    
+    def updatePlanet(self, galaxy:int, system:int, position:int, playerId:str=-1):
+        sql = """INSERT INTO public.planet(
+            "playerId", "galaxy", "system", "position")
+            VALUES ( %s, %s, %s, %s)
+            on conflict ("galaxy", "system", "position") DO UPDATE 
+            SET "playerId" = excluded."playerId",
+                "galaxy" = excluded."galaxy",
+                "system" = excluded."system",
+                "position" = excluded."position"
+                "timestamp" =  now()"""
+        
         self._write(sql,(playerId, galaxy, system, position))
     
     def delNotify(self, id:str, type:str):
@@ -348,15 +352,6 @@ class DB():
         
         self._write(sql,(userId, role))
     
-    def setPlanet(self, playerId:str, galaxy:int, system:int, position:int):
-        sql = """INSERT INTO public.planet(
-            "playerId", "galaxy", "system", "position", "moon", "sensorPhalanx")
-            VALUES ( %s, %s, %s, %s, %s, %s) 
-            on conflict ("galaxy", "system", "position") DO UPDATE 
-            SET "playerId" = excluded."playerId" ;"""
-        
-        self._write(sql,(playerId, galaxy, system, position, False , 0 ))
-
     def setMoon(self, playerId:str, galaxy:int, system:int, position:int, moon:bool):
         sql = """UPDATE PUBLIC."planet"
             SET MOON = %s

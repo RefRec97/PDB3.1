@@ -64,7 +64,7 @@ class Planet(interactions.Extension):
             return
 
         #save planet
-        self._db.setPlanet(playerData[1], galaxy, system, position)
+        self._db.updatePlanet(galaxy,system,position,playerData[1])
         
         try:
             statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
@@ -79,12 +79,6 @@ class Planet(interactions.Extension):
         name="del_planet",
         description="Löscht ein Planet",
         options = [
-            interactions.Option(
-                name="username",
-                description="Pr0game Username",
-                type=interactions.OptionType.STRING,
-                required=True
-            ),
             interactions.Option(
                 name="galaxy",
                 description="Galaxy",
@@ -105,7 +99,7 @@ class Planet(interactions.Extension):
             ),
         ],
     )
-    async def delPlanet(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
+    async def delPlanet(self, ctx: interactions.CommandContext, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
         
@@ -120,36 +114,8 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        #get userId
-        playerData = self._db.getPlayerData(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
-            return
-
-        #check if planet exists
-        userPlanets = self._db.getPlayerPlanets(playerData[1])
-
-        #Check and delete if found
-        for planet in userPlanets:
-            if (planet[2] == galaxy and 
-                planet[3] == system and 
-                planet[4] == position):
-
-                # delete planet
-                self._db.delPlanet(playerData[1], galaxy, system, position)
-
-                try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
-                except ValueError as err:
-                    self._logger.debug(err)
-                    await ctx.send(str(err), ephemeral=True)
-                    return
-
-                await ctx.send(embeds=statsEmbed, components=statsComponent)
-                return
-
-        #No planet found
-        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        self._db.updatePlanet(galaxy,system,position)
+        await ctx.send(f"Planet Gelöscht {galaxy}\:{system}\:{position}")
 
     @interactions.extension_command(
         name="moon",
