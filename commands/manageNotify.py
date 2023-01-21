@@ -57,7 +57,7 @@ class ManageNotify(interactions.Extension):
         ]
     )
     async def add_notify(self, ctx: interactions.CommandContext, type:str, username:str=None):
-        self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
@@ -78,6 +78,44 @@ class ManageNotify(interactions.Extension):
 
         await ctx.send(f"Im Verteiler aufgenommen {ctx.user.mention}")
     
+    @interactions.extension_command(
+        name="del_notify",
+        description="Löscht dich vom Nachrichtenvertieler",
+        options =[
+            interactions.Option(
+                type=interactions.OptionType.STRING,
+                name="type",
+                description="Kategorie",
+                required=True,
+                choices=[
+                    interactions.Choice(name="Expo cap increase", value=Notify.EXPO_SIZE),
+                    interactions.Choice(name="Sensor Phalanx reichweite", value=Notify.SENSOR_PHALANX)
+                ]
+            ),
+            interactions.Option(
+                name="username",
+                description="Pr0game Username",
+                type=interactions.OptionType.STRING,
+                required=True
+            )
+        ]
+    )
+    async def del_notify(self, ctx: interactions.CommandContext, type:str, username:str=None):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+
+        if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+        
+        existing = self._db.getNotify(str(ctx.user.id),type)
+        if existing and existing[0][1] == type:
+            self._db.delNotify(str(ctx.user.id),type)
+            await ctx.send(f"Gelöscht", ephemeral=True)
+            return
+
+
+        await ctx.send(f"Nicht gefunden", ephemeral=True)
+
 def setup(client, args):
     ManageNotify(client, args)
     

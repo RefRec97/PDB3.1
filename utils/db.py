@@ -196,6 +196,13 @@ class DB():
                 planet."position" = %s;"""
 
         self._write(sql,(playerId, galaxy, system, position))
+    
+    def delNotify(self, id:str, type:str):
+        sql = """DELETE FROM public.notify
+            WHERE notify."id" = %s
+            AND notify."type" = %s;"""
+        
+        return self._write(sql,(id,type,))
 
     def getResearch(self, playerId:str):
         sql = """SELECT
@@ -273,7 +280,7 @@ class DB():
             AND notify."type" = %s;"""
 
         return self._read(sql,(id,type,))
-    
+
     def getNotifyByType(self, type:str):
         sql = """SELECT "id",
             "type",
