@@ -16,7 +16,7 @@ class Notify():
         self._db:DB = db
     
 
-    async def notify(self, type, message, discordId=None):
+    async def notify(self, type, message):
 
         for data in self._db.getNotifyByType(type):
             id = data[0]
@@ -28,13 +28,14 @@ class Notify():
             elif type == Notify.EXPO_SIZE:
                 target = await interactions.get(self._client, interactions.Member, parent_id=guildId, object_id=id)
             
-            elif type == Notify.SENSOR_PHALANX:
-                target = await interactions.get(self._client, interactions.Member, parent_id=guildId, object_id=discordId)
-                await target.send(embeds=message)
-                return
-            
             await target.send(message)
     
+    async def notifySingleUser(self, message, target):
+        
+        target = await interactions.get(self._client, interactions.Member, parent_id=target[2], object_id=target[0])
+        
+        await target.send(embeds=message)
+
     async def checkSensor(self,moon,newLevel):
 
         oldRange = (moon[6]*moon[6]) -1
@@ -54,10 +55,10 @@ class Notify():
         if upperOldRange > 400:
             upperOldRange -= 400
         
-        players = self._db.getNotifyByType(self.SENSOR_PHALANX)
-        for player in players:
+        targets = self._db.getNotifyByType(self.SENSOR_PHALANX)
+        for target in targets:
 
-            playerPlanets = self._db.getPlayerPlanets(player[3])
+            playerPlanets = self._db.getPlayerPlanets(target[3])
             found = False
             field = interactions.EmbedField(
                     inline=False,
@@ -80,8 +81,8 @@ class Notify():
             if found:
                 embed = interactions.Embed(
                     title=f"Phalanx Warnung!",
-                    description= f"Folgende deiner Planeten ist(sind) in Reichweite",
+                    description= f"Sensor Phalanx wurde aktualisiert auf Mond: [{moon[2]}\:{moon[3]}\:{moon[4]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={moon[2]}&system={moon[3]})",
                     fields = [field]
                 )
-                await self.notify(self.SENSOR_PHALANX, embed, player[0])
+                await self.notifySingleUser(embed, target)
 
