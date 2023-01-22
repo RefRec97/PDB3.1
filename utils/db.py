@@ -196,7 +196,7 @@ class DB():
             SET "playerId" = excluded."playerId",
                 "galaxy" = excluded."galaxy",
                 "system" = excluded."system",
-                "position" = excluded."position"
+                "position" = excluded."position",
                 "timestamp" =  now()"""
         
         self._write(sql,(playerId, galaxy, system, position))
