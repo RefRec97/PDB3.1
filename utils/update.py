@@ -48,33 +48,12 @@ class Update():
                     
                     #update evrything here
                     await self._updateStats()
-                    await self._checkExpoCap()
+                    await self._notify.checkExpoCap()
         else:
             self._done = False
         
         #restart Timer
         self._timer = Timer(10, self._tick)
-
-    async def _checkExpoCap(self):
-        self._logger.info("Checking expo cap")
-        scoreCap = [
-            100000,
-            1000000,
-            5000000,
-            25000000,
-            50000000,
-            75000000,
-            100000000
-        ]
-
-
-        lastTopScores = self._db.getScoreForExpo()
-        current = lastTopScores[0][0]
-        last = lastTopScores[1][0]
-        
-        for score in scoreCap:
-            if last < score and current >= score:
-                await self._notify.notify(Notify.EXPO_SIZE, "Info: Expo cap ist erhöht")
 
     
     async def _updateStats(self):

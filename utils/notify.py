@@ -23,10 +23,18 @@ class Notify():
             guildId = data[2]
             
             if type == Notify.CHANNEL:
-                target = await interactions.get(self._client, interactions.Channel, object_id=id)
+                try:
+                    target = await interactions.get(self._client, interactions.Channel, object_id=id)
+                except:
+                    self._logger.error("Failed to get Channel")
+                    return
 
             elif type == Notify.EXPO_SIZE:
-                target = await interactions.get(self._client, interactions.Member, parent_id=guildId, object_id=id)
+                try:
+                    target = await interactions.get(self._client, interactions.Member, parent_id=guildId, object_id=id)
+                except:
+                    self._logger.error("Failed to get User")
+                    return
             
             await target.send(message)
     
@@ -55,7 +63,7 @@ class Notify():
         if upperOldRange > 400:
             upperOldRange -= 400
         
-        targets = self._db.getNotifyByType(self.SENSOR_PHALANX)
+        targets = self._db.getNotifyByType(Notify.SENSOR_PHALANX)
         for target in targets:
 
             playerPlanets = self._db.getPlayerPlanets(target[3])
@@ -86,3 +94,23 @@ class Notify():
                 )
                 await self.notifySingleUser(embed, target)
 
+    async def checkExpoCap(self):
+        self._logger.info("Checking expo cap")
+        scoreCap = [
+            100000,
+            1000000,
+            5000000,
+            25000000,
+            50000000,
+            75000000,
+            100000000
+        ]
+
+
+        lastTopScores = self._db.getScoreForExpo()
+        current = lastTopScores[0][0]
+        last = lastTopScores[1][0]
+        
+        for score in scoreCap:
+            if last < score and current >= score:
+                await self.notify(Notify.EXPO_SIZE, "Info: Expo cap ist erhöht")
