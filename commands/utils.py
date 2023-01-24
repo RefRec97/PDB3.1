@@ -74,13 +74,8 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
-            - Löschen von alten Userdaten
-            - Notification Service bei Events
-                - Mond und nun in reichweite
-                - Anmeldbar (private/public nachricht)
             - Mond Map
             - Mond range (monde die einen Planeten scannen können)
-            - \"Miner's Toolbox\"
             - Allianz Plazierung pro update ausrechnen und speichern
             - DB statistik (anzahl planeten,statseinträge,...)
                 (weil ich daten Geil finde!)"""
