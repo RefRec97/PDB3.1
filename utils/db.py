@@ -197,7 +197,7 @@ class DB():
                 "galaxy" = excluded."galaxy",
                 "system" = excluded."system",
                 "position" = excluded."position",
-                "timestamp" =  now()"""
+                "timestamp" = now()"""
         
         self._write(sql,(playerId, galaxy, system, position))
     
@@ -364,10 +364,11 @@ class DB():
     
     def setSensor(self, playerId:str, galaxy:int, system:int, position:int, sensor:int):
         sql = """UPDATE PUBLIC."planet"
-            SET "sensorPhalanx" = %s
+            SET "sensorPhalanx" = %s,
+                "timestamp" = now()
             WHERE PLANET."playerId" = %s
                 AND PLANET."galaxy" = %s
-                AND PLANET."system" = %s
+                AND PLANET."system" = %s 
                 AND PLANET."position" = %s;"""
         
         self._write(sql,(sensor, playerId, galaxy, system, position, ))
