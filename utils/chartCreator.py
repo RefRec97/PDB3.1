@@ -123,29 +123,28 @@ class ChartCreator():
                 "debrisMetal": [],
                 "debrisCrystal": [],
                 "unitsDestroyed": [],
-                "unitsLost": [],
-                "labels": []
+                "unitsLost": []
             }
 
             for datapoint in reversed(user):
-                chartData["rank"].append(datapoint[1])
-                chartData["score"].append(datapoint[2])
-                chartData["researchRank"].append(datapoint[3])
-                chartData["researchScore"].append(datapoint[4])
-                chartData["buildingRank"].append(datapoint[5])
-                chartData["buildingScore"].append(datapoint[6])
-                chartData["defensiveRank"].append(datapoint[7])
-                chartData["defensiveScore"].append(datapoint[8])
-                chartData["fleetRank"].append(datapoint[9])
-                chartData["fleetScore"].append(datapoint[10])
-                chartData["battlesWon"].append(datapoint[11])
-                chartData["battlesLost"].append(datapoint[12])
-                chartData["battlesDraw"].append(datapoint[13])
-                chartData["debrisMetal"].append(datapoint[14])
-                chartData["debrisCrystal"].append(datapoint[15])
-                chartData["unitsDestroyed"].append(datapoint[16])
-                chartData["unitsLost"].append(datapoint[17])
-                chartData["labels"].append(datetime.datetime.strftime(datapoint[-1], "%H-%d.%m.%Y") )
+                time = datetime.datetime.strftime(datapoint[-1], "%Y-%m-%d %H:00")
+                chartData["rank"].append({"x":time, "y":datapoint[1]})
+                chartData["score"].append({"x":time, "y":datapoint[2]})
+                chartData["researchRank"].append({"x":time, "y":datapoint[3]})
+                chartData["researchScore"].append({"x":time, "y":datapoint[4]})
+                chartData["buildingRank"].append({"x":time, "y":datapoint[5]})
+                chartData["buildingScore"].append({"x":time, "y":datapoint[6]})
+                chartData["defensiveRank"].append({"x":time, "y":datapoint[7]})
+                chartData["defensiveScore"].append({"x":time, "y":datapoint[8]})
+                chartData["fleetRank"].append({"x":time, "y":datapoint[9]})
+                chartData["fleetScore"].append({"x":time, "y":datapoint[10]})
+                chartData["battlesWon"].append({"x":time, "y":datapoint[11]})
+                chartData["battlesLost"].append({"x":time, "y":datapoint[12]})
+                chartData["battlesDraw"].append({"x":time, "y":datapoint[13]})
+                chartData["debrisMetal"].append({"x":time, "y":datapoint[14]})
+                chartData["debrisCrystal"].append({"x":time, "y":datapoint[15]})
+                chartData["unitsDestroyed"].append({"x":time, "y":datapoint[16]})
+                chartData["unitsLost"].append({"x":time, "y":datapoint[17]})
 
             userChartData.append(chartData)
 
@@ -548,7 +547,6 @@ class ChartCreator():
         defaultConfig = {
             "type": "line",
             "data": {
-                "labels": chartData[0]["labels"],
                 "datasets": []
             },
             "options": {
@@ -558,7 +556,8 @@ class ChartCreator():
                 },
                 "scales": {
                     "xAxes": [{
-                        "stacked": True
+                        "type": "time",
+                        "display": True,
                     }],
                     "yAxes": []
                 }
