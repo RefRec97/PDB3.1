@@ -150,7 +150,7 @@ class StatsCreator():
 
     def _getPhalanxRange(self,planet):
         if planet[6] == 0:
-            return 0
+            return planet[3],planet[3]
 
         range = (planet[6]*planet[6]) -1
         startSystem = (planet[3] - range)
