@@ -136,7 +136,9 @@ class StatsCreator():
 
             value = "-"
             if planet[5] and planet[6] >=0:
-                value = planet[6]
+                startSystem, endSystem = self._getPhalanxRange(planet)
+                value = f"{planet[6]}  [{startSystem}-{endSystem}]"
+            
             planetEmbeds[2].value += f"{value}\n"
         
         if not planetData:
@@ -145,6 +147,18 @@ class StatsCreator():
             planetEmbeds[2].value = "-"
 
         return planetEmbeds
+
+    def _getPhalanxRange(self,planet):
+        range = (planet[6]*planet[6]) -1
+        startSystem = (planet[3] - range)
+        endSystem = (planet[3] + range)
+        if startSystem < 0:
+            startSystem += 400
+        if endSystem > 400:
+            endSystem -= 400
+        
+        return startSystem,endSystem
+
 
     def _getResearchFields(self, playerId:str):
 

@@ -264,7 +264,7 @@ class Planet(interactions.Extension):
         await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
-        name="sensor",
+        name="phalanx",
         description="Setzt das Sensor Phalanx Level auf einem Mond",
         options = [
             interactions.Option(
@@ -299,7 +299,7 @@ class Planet(interactions.Extension):
             )
         ],
     )
-    async def sensor(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
+    async def phalanx(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
