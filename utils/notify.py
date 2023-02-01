@@ -45,24 +45,6 @@ class Notify():
         await target.send(embeds=message)
 
     async def checkSensor(self,moon,newLevel):
-
-        oldRange = (moon[6]*moon[6]) -1
-        newRange = (newLevel*newLevel) -1
-        lowerNewRange = (moon[3] - newRange)
-        upperNewRange = (moon[3] + newRange)
-        lowerOldRange = (moon[3] - oldRange)
-        upperOldRange = (moon[3] + oldRange)
-        
-        #cyclic universe adjustments
-        if lowerNewRange < 0:
-            lowerNewRange += 400
-        if upperNewRange > 400:
-            upperNewRange -= 400
-        if lowerOldRange < 0:
-            lowerOldRange += 400
-        if upperOldRange > 400:
-            upperOldRange -= 400
-        
         targets = self._db.getNotifyByType(Notify.SENSOR_PHALANX)
         for target in targets:
 
@@ -80,8 +62,8 @@ class Notify():
                 #   - old sensor level is not in range
 
                 if moon[2] == planet[2] and\
-                    ( lowerNewRange <= planet[3] or planet[3] <= upperNewRange) and\
-                    not ( lowerOldRange <= planet[3] or planet[3] <= upperOldRange):
+                    self._isPlanetInSensorRange(moon[3],newLevel,planet[3]) and\
+                    not self._isPlanetInSensorRange(moon[3],moon[6],planet[3]):
 
                     found = True
                     field.value += f"[{planet[2]}\:{planet[3]}\:{planet[4]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={planet[2]}&system={planet[3]})\n"
@@ -114,3 +96,19 @@ class Notify():
         for score in scoreCap:
             if last < score and current >= score:
                 await self.notify(Notify.EXPO_SIZE, "Info: Expo cap ist erhöht")
+    
+    def _isPlanetInSensorRange(self, moonSystem, moonLevel, planetSystem):
+        if moonLevel == 0:
+            return False
+
+        range = (moonLevel*moonLevel) -1
+        startSystem = (moonSystem - range)
+        endSystem = (moonSystem + range)
+
+        if endSystem > 400 and planetSystem < endSystem-400:
+            return 0 < planetSystem < endSystem-400
+        
+        if startSystem < 0 and planetSystem > startSystem+400:
+            return startSystem+400 < planetSystem < 400
+            
+        return (startSystem <= planetSystem <= endSystem)

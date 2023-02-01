@@ -344,6 +344,68 @@ class Planet(interactions.Extension):
         await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
+        name="in_range",
+        description="Zeigt an ob eine Position in reichweite eines Sensor Phalanx ist",
+        options = [
+            interactions.Option(
+                name="galaxy",
+                description="Galaxy",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            ),
+            interactions.Option(
+                name="system",
+                description="System",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            )
+        ],
+    )
+    async def inRange(self, ctx: interactions.CommandContext, galaxy:int, system:int):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+
+        if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+
+        try:
+            self._checkValidPosition(galaxy,system,1)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+
+        galaxyMoons = self._db.getAllGalaxyMoons(galaxy)
+        if not galaxyMoons:
+            await ctx.send(f"Keine Moonde in der Galaxy: {galaxy}", ephemeral=True)
+            return
+
+        result = ""
+        for moon in galaxyMoons:
+            if moon[1] == 0:
+                continue
+            if self._isPlanetInSensorRange(moon[0],moon[1], system):
+                result += f"[{galaxy}\:{moon[0]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={galaxy}&system={moon[0]})\n"
+
+        resultEmbed = interactions.Embed(
+            title= "Monde In Scanreichweite",
+            description= f"für Planet auf Position [{galaxy}\:{system}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={galaxy}&system={system})",
+            fields= [
+                        interactions.EmbedField(
+                        inline=True,
+                        name="Monde:",
+                        value=result
+                    )
+                ]
+            )
+        
+        if not result:
+            await ctx.send(f"Keine Monde in Reichweite")
+            return
+        
+        await ctx.send(embeds=resultEmbed)
+
+    @interactions.extension_command(
         name="alliance_position",
         description="Planetenpositionen der Allianz",
         options = [
@@ -376,6 +438,25 @@ class Planet(interactions.Extension):
             fields= self._getAlliancePlanetFields(alliancePlanets)
         )
         await ctx.send(embeds=planetEmbed)
+
+
+    def _isPlanetInSensorRange(self, moonSystem, moonLevel, planetSystem):
+        if moonLevel == 0:
+            return False
+
+        range = (moonLevel*moonLevel) -1
+        startSystem = (moonSystem - range)
+        endSystem = (moonSystem + range)
+
+        if endSystem > 400 and planetSystem < endSystem-400:
+            return 0 < planetSystem < endSystem-400
+        
+        if startSystem < 0 and planetSystem > startSystem+400:
+            return startSystem+400 < planetSystem < 400
+            
+        return (startSystem <= planetSystem <= endSystem)
+        
+
 
     def _getAlliancePlanetFields(self,alliancePlanets):
         sortedPlanets = sorted(alliancePlanets, key = lambda x: (x[2], x[3], x[4]))
