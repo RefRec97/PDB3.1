@@ -384,7 +384,7 @@ class Planet(interactions.Extension):
         for moon in galaxyMoons:
             if moon[1] == 0:
                 continue
-            if self._isPlanetInSensorRange(moon[0],moon[1], system):
+            if self._statsCreator.isPlanetInSensorRange(moon[0],moon[1], system):
                 result += f"[{galaxy}\:{moon[0]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={galaxy}&system={moon[0]})\n"
 
         resultEmbed = interactions.Embed(
@@ -438,25 +438,6 @@ class Planet(interactions.Extension):
             fields= self._getAlliancePlanetFields(alliancePlanets)
         )
         await ctx.send(embeds=planetEmbed)
-
-
-    def _isPlanetInSensorRange(self, moonSystem, moonLevel, planetSystem):
-        if moonLevel == 0:
-            return False
-
-        range = (moonLevel*moonLevel) -1
-        startSystem = (moonSystem - range)
-        endSystem = (moonSystem + range)
-
-        if endSystem > 400 and planetSystem < endSystem-400:
-            return 0 < planetSystem < endSystem-400
-        
-        if startSystem < 0 and planetSystem > startSystem+400:
-            return startSystem+400 < planetSystem < 400
-            
-        return (startSystem <= planetSystem <= endSystem)
-        
-
 
     def _getAlliancePlanetFields(self,alliancePlanets):
         sortedPlanets = sorted(alliancePlanets, key = lambda x: (x[2], x[3], x[4]))

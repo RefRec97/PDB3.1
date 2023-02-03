@@ -119,7 +119,7 @@ class StatsCreator():
                 inline=True
             ),
             interactions.EmbedField(
-                name="Sensor Phalanx",
+                name="Scannbar",
                 value="",
                 inline=True
             ),
@@ -129,17 +129,15 @@ class StatsCreator():
         for planet in planetData:
             planetEmbeds[0].value += f"[{planet[2]}\:{planet[3]}\:{planet[4]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={planet[2]}&system={planet[3]})\n"
             
-            value = "-"
-            if planet[5]:
-                value = ":ballot_box_with_check:"
-            planetEmbeds[1].value += f"{value}\n"
 
             value = "-"
             if planet[5] and planet[6] >=0:
                 startSystem, endSystem = self._getPhalanxRange(planet)
-                value = f"{planet[6]}  [{startSystem}-{endSystem}]"
+                value = f":new_moon:{planet[6]}  [{startSystem}-{endSystem}]"
             
-            planetEmbeds[2].value += f"{value}\n"
+            planetEmbeds[1].value += f"{value}\n"
+
+            planetEmbeds[2].value += f"{self._getOtherPlanetSymbols(planet)}\n"
         
         if not planetData:
             planetEmbeds[0].value = "-"
@@ -147,6 +145,23 @@ class StatsCreator():
             planetEmbeds[2].value = "-"
 
         return planetEmbeds
+
+    def _getOtherPlanetSymbols(self, planet):
+        result="-"
+        
+        galaxyMoons = self._db.getAllGalaxyMoons(galaxy=planet[2])
+        moonScanCount = 0
+        for moon in galaxyMoons:
+            if moon[1] == 0:
+                continue
+            if self.isPlanetInSensorRange(moon[0],moon[1],planet[3]):
+                moonScanCount+=1
+        
+        if moonScanCount > 0:
+            result =  f":exclamation:{moonScanCount}"
+
+        return result
+        
 
     def _getPhalanxRange(self,planet):
         if planet[6] == 0:
@@ -168,7 +183,7 @@ class StatsCreator():
         researchData = self._db.getResearch(playerId)
 
         if not researchData:
-            researchData = ['-','-','-','-','-','-','Kein Eintrag']
+            return []
 
         researchFields= [
             interactions.EmbedField(
@@ -180,15 +195,26 @@ class StatsCreator():
                 inline=True,
                 name="Triebwerk",
                 value=f":fire: {researchData[3]}\n:zap: {researchData[4]}\n:cyclone: {researchData[5]}\n"
-            ),
-            interactions.EmbedField(
-                inline=True,
-                name="Zeit",
-                value=f":clock2:{researchData[6]}\n"
             )
         ]
 
         return researchFields
+
+    def isPlanetInSensorRange(self, moonSystem, moonLevel, planetSystem):
+        if moonLevel == 0:
+            return False
+
+        range = (moonLevel*moonLevel) -1
+        startSystem = (moonSystem - range)
+        endSystem = (moonSystem + range)
+
+        if endSystem > 400 and planetSystem < endSystem-400:
+            return 0 < planetSystem < endSystem-400
+        
+        if startSystem < 0 and planetSystem > startSystem+400:
+            return startSystem+400 < planetSystem < 400
+            
+        return (startSystem <= planetSystem <= endSystem)
 
     def _getEmbedValueString(self, data, diff):
         #get largest number
