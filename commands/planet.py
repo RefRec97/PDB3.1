@@ -268,7 +268,6 @@ class Planet(interactions.Extension):
         #No planet found
         await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
-    @interactions.autodefer(delay=5)
     @interactions.extension_command(
         name="phalanx",
         description="Setzt das Sensor Phalanx Level auf einem Mond",
@@ -303,7 +302,7 @@ class Planet(interactions.Extension):
                 type=interactions.OptionType.INTEGER,
                 required=True
             )
-        ],
+        ]
     )
     async def phalanx(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
