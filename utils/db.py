@@ -231,7 +231,8 @@ class DB():
         return self._read(sql,(allianceID,))
 
     def getAllGalaxyMoons(self, galaxy:int):
-        sql = """SELECT "system",
+        sql = """SELECT "playerId",
+            "system",
             "sensorPhalanx"
         FROM PUBLIC."planet"
         WHERE PLANET."galaxy" = %s
@@ -239,6 +240,12 @@ class DB():
 
         return self._read(sql,(galaxy,))
 
+    def getAllianceMember(self, allianceId):
+        sql = """SELECT "playerId"
+        FROM public.player
+        WHERE "allianceId" = %s"""
+
+        return self._read(sql,(allianceId,))
 
     def getAllAllianceStats(self, allianceID:str):
         sql = """

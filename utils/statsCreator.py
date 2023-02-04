@@ -133,7 +133,7 @@ class StatsCreator():
             value = "-"
             if planet[5] and planet[6] >=0:
                 startSystem, endSystem = self._getPhalanxRange(planet)
-                value = f":new_moon:{planet[6]}  [{startSystem}-{endSystem}]"
+                value = f"{planet[6]}  [{startSystem}-{endSystem}]"
             
             planetEmbeds[1].value += f"{value}\n"
 
@@ -150,15 +150,27 @@ class StatsCreator():
         result="-"
         
         galaxyMoons = self._db.getAllGalaxyMoons(galaxy=planet[2])
-        moonScanCount = 0
-        for moon in galaxyMoons:
-            if moon[1] == 0:
-                continue
-            if self.isPlanetInSensorRange(moon[0],moon[1],planet[3]):
-                moonScanCount+=1
         
-        if moonScanCount > 0:
-            result =  f":exclamation:{moonScanCount}"
+        friendlyPlayerIds = []
+        for entry in self._db.getAllianceMember(326): #Allianz mit Poll
+            friendlyPlayerIds.append(entry[0])
+        for entry in self._db.getAllianceMember(401): #Space Schmuser
+            friendlyPlayerIds.append(entry[0])
+        friendlyMoon = 0
+        enemyMoon = 0
+
+        
+        for moon in galaxyMoons:
+            if moon[2] == 0:
+                continue
+            if self.isPlanetInSensorRange(moon[1],moon[2],planet[3]):
+                if moon[0] in friendlyPlayerIds:
+                    friendlyMoon+=1
+                else:
+                    enemyMoon+=1
+        
+        if enemyMoon > 0 or friendlyMoon > 0:
+            result =  f":exclamation: {enemyMoon}\u2001\u2001:heart: {friendlyMoon}"
 
         return result
         

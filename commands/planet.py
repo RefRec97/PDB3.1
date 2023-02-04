@@ -382,10 +382,10 @@ class Planet(interactions.Extension):
 
         result = ""
         for moon in galaxyMoons:
-            if moon[1] == 0:
+            if moon[2] == 0:
                 continue
-            if self._statsCreator.isPlanetInSensorRange(moon[0],moon[1], system):
-                result += f"[{galaxy}\:{moon[0]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={galaxy}&system={moon[0]})\n"
+            if self._statsCreator.isPlanetInSensorRange(moon[1],moon[2], system):
+                result += f"[{galaxy}\:{moon[1]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={galaxy}&system={moon[1]})\n"
 
         resultEmbed = interactions.Embed(
             title= "Monde In Scanreichweite",
