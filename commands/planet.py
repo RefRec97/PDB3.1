@@ -16,7 +16,6 @@ class Planet(interactions.Extension):
         self._statsCreator:StatsCreator = args[2]
         self._notify:Notify = args[3]
     
-    @interactions.autodefer(delay=5)
     @interactions.extension_command(
         name="planet",
         description="Speichert ein Planet",
@@ -47,6 +46,7 @@ class Planet(interactions.Extension):
             ),
         ],
     )
+    @interactions.autodefer(delay=5)
     async def planet(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
@@ -76,7 +76,7 @@ class Planet(interactions.Extension):
         
         await ctx.edit("",embeds=statsEmbed, components=statsComponent)
 
-    @interactions.autodefer(delay=5)
+    
     @interactions.extension_command(
         name="del_planet",
         description="Löscht ein Planet",
@@ -101,6 +101,7 @@ class Planet(interactions.Extension):
             ),
         ],
     )
+    @interactions.autodefer(delay=5)
     async def delPlanet(self, ctx: interactions.CommandContext, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
@@ -119,7 +120,7 @@ class Planet(interactions.Extension):
         self._db.updatePlanet(galaxy,system,position)
         await ctx.send(f"Planet Gelöscht {galaxy}\:{system}\:{position}")
 
-    @interactions.autodefer(delay=5)
+    
     @interactions.extension_command(
         name="moon",
         description="Speichert ein Mond",
@@ -150,6 +151,7 @@ class Planet(interactions.Extension):
             ),
         ],
     )
+    @interactions.autodefer(delay=5)
     async def moon(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
@@ -194,7 +196,7 @@ class Planet(interactions.Extension):
         #No planet found
         await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
-    @interactions.autodefer(delay=5)
+    
     @interactions.extension_command(
         name="del_moon",
         description="Speichert ein Mond",
@@ -225,6 +227,7 @@ class Planet(interactions.Extension):
             ),
         ],
     )
+    @interactions.autodefer(delay=5)
     async def delMoon(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
