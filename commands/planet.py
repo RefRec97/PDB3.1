@@ -16,7 +16,7 @@ class Planet(interactions.Extension):
         self._statsCreator:StatsCreator = args[2]
         self._notify:Notify = args[3]
     
-    
+    @interactions.autodefer(delay=5)
     @interactions.extension_command(
         name="planet",
         description="Speichert ein Planet",
@@ -66,6 +66,7 @@ class Planet(interactions.Extension):
         #save planet
         self._db.updatePlanet(galaxy,system,position,playerData[1])
         
+        await ctx.send("Working...")
         try:
             statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
         except ValueError as err:
@@ -73,8 +74,9 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
         
-        await ctx.send(embeds=statsEmbed, components=statsComponent)
+        await ctx.edit("",embeds=statsEmbed, components=statsComponent)
 
+    @interactions.autodefer(delay=5)
     @interactions.extension_command(
         name="del_planet",
         description="Löscht ein Planet",
@@ -117,6 +119,7 @@ class Planet(interactions.Extension):
         self._db.updatePlanet(galaxy,system,position)
         await ctx.send(f"Planet Gelöscht {galaxy}\:{system}\:{position}")
 
+    @interactions.autodefer(delay=5)
     @interactions.extension_command(
         name="moon",
         description="Speichert ein Mond",
@@ -178,18 +181,20 @@ class Planet(interactions.Extension):
 
                 self._db.setMoon(playerData[1],galaxy,system,position,True)
 
+                await ctx.send("Working...")
                 try:
                     statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
                     return
-                await ctx.send(embeds=statsEmbed, components=statsComponent)
+                await ctx.edit("",embeds=statsEmbed, components=statsComponent)
                 return
 
         #No planet found
-        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
+    @interactions.autodefer(delay=5)
     @interactions.extension_command(
         name="del_moon",
         description="Speichert ein Mond",
@@ -250,19 +255,20 @@ class Planet(interactions.Extension):
                 planet[5]):
 
                 self._db.setMoon(playerData[1],galaxy,system,position,False)
-
+                await ctx.send("Working...")
                 try:
                     statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
                     return
-                await ctx.send(embeds=statsEmbed, components=statsComponent)
+                await ctx.edit("",embeds=statsEmbed, components=statsComponent)
                 return
 
         #No planet found
-        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
+    @interactions.autodefer(delay=5)
     @interactions.extension_command(
         name="phalanx",
         description="Setzt das Sensor Phalanx Level auf einem Mond",
@@ -330,18 +336,19 @@ class Planet(interactions.Extension):
                 
                 await self._notify.checkSensor(planet,level)
                 self._db.setSensor(playerData[1],galaxy,system,position,level)
-
+                
+                await ctx.send("Working...")
                 try:
                     statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
                     return
-                await ctx.send(embeds=statsEmbed, components=statsComponent)
+                await ctx.edit("",embeds=statsEmbed, components=statsComponent)
                 return
 
         #No planet/moon found
-        await ctx.send(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
         name="in_range",

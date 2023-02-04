@@ -37,6 +37,7 @@ class Stats(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
+        await ctx.send("Working...",embeds=None)
         try:
             statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
         except ValueError as err:
@@ -44,10 +45,10 @@ class Stats(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
         
-        await ctx.send(embeds=statsEmbed, components=statsComponent)
-
+        await ctx.edit("",embeds=statsEmbed, components=statsComponent)
 
     #Refresh Button
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("btn_reload")
     async def btn_reload(self, ctx:interactions.ComponentContext):
         self._logger.info("Button clicked: btn_alliance from %s", ctx.user.username)
@@ -67,6 +68,7 @@ class Stats(interactions.Extension):
         await ctx.edit(embeds=statsEmbed, components=statsComponent)
 
     #Alliance Button
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("btn_alliance")
     async def btn_alliance(self, ctx:interactions.ComponentContext):   
         self._logger.debug("Button clicked: btn_alliance from %s", ctx.user.username)
@@ -128,6 +130,7 @@ class Stats(interactions.Extension):
         await ctx.popup(planetModal)
 
     #Confirm Planet Modal
+    @interactions.autodefer(delay=5)
     @interactions.extension_modal("modal_planet")
     async def modal_planet_save(self, ctx:interactions.ComponentContext, galaxy:str, system:str, position:str):
         self._logger.info("Modal Confirmed from: %s", ctx.user.username)
@@ -207,6 +210,7 @@ class Stats(interactions.Extension):
         await ctx.popup(researchModal)
 
     #Confirm Attack Research Modal
+    @interactions.autodefer(delay=5)
     @interactions.extension_modal("modal_research_attack")
     async def modal_research_attack_save(self, ctx:interactions.ComponentContext, weapon:str, shield:str, armor:str):
         self._logger.info("Modal Confirmed from: %s", ctx.user.username)
@@ -235,6 +239,7 @@ class Stats(interactions.Extension):
         await ctx.send()
 
     #Drive research Modal
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("btn_research_drive")
     async def modal_research_drive(self, ctx:interactions.ComponentContext):      
         self._logger.info("Button clicked: btn_research_drive from %s", ctx.user.username)
@@ -344,6 +349,7 @@ class Stats(interactions.Extension):
         await ctx.send(embeds=allianceEmbed, components=interactions.spread_to_rows(*allianceComponent))
 
     #Alliance Player Select 1
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("allianceplayerselect1")
     async def alliancePlayerSelect1(self, ctx:interactions.ComponentContext, value): 
         try:
@@ -357,6 +363,7 @@ class Stats(interactions.Extension):
         await ctx.send()
 
     #Alliance Player Select 2
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("allianceplayerselect2")
     async def alliancePlayerSelect2(self, ctx:interactions.ComponentContext, value):
         try:
@@ -370,6 +377,7 @@ class Stats(interactions.Extension):
         await ctx.send()
 
     #Alliance Player Select 3
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("allianceplayerselect3")
     async def alliancePlayerSelect3(self, ctx:interactions.ComponentContext, value): 
         try:
@@ -383,6 +391,7 @@ class Stats(interactions.Extension):
         await ctx.send()
 
     #Alliance Player Select 4
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("allianceplayerselect4")
     async def alliancePlayerSelect4(self, ctx:interactions.ComponentContext, value): 
         try:
@@ -396,6 +405,7 @@ class Stats(interactions.Extension):
         await ctx.send()
 
     #Alliance Player Select 5
+    @interactions.autodefer(delay=5)
     @interactions.extension_component("allianceplayerselect5")
     async def alliancePlayerSelect5(self, ctx:interactions.ComponentContext, value): 
         try:
