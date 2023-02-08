@@ -413,6 +413,71 @@ class Planet(interactions.Extension):
             return
         
         await ctx.send(embeds=resultEmbed)
+    
+    @interactions.extension_command(
+        name="all_moons",
+        description="Zeigt eine Liste aller Monde in einer Galaxy an",
+        options = [
+            interactions.Option(
+                name="galaxy",
+                description="Galaxy",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            )
+        ],
+    )
+    async def all_moons(self, ctx: interactions.CommandContext, galaxy:int):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+
+        if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+
+        try:
+            self._checkValidPosition(galaxy)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+
+        galaxyMoons = self._db.getAllGalaxyMoons(galaxy)
+        if not galaxyMoons:
+            await ctx.send(f"Keine Moonde in der Galaxy: {galaxy}", ephemeral=True)
+            return
+
+        moonFields = []
+        fieldValue = ""
+        sortedMoons = sorted(galaxyMoons, key = lambda x: x[1])
+        for idx,moon in enumerate(sortedMoons):
+            if idx%10 == 0 and fieldValue:
+                moonFields.append(
+                    interactions.EmbedField(
+                        name="Position",
+                        value=fieldValue,
+                        inline=True
+                    )
+                )
+                fieldValue = ""
+            
+            fieldValue += f"[{galaxy}\:{moon[1]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={galaxy}&system={moon[1]})\n"
+        
+        #Add not fully filled Field (if exist)
+        if fieldValue:
+            moonFields.append(
+                interactions.EmbedField(
+                    name="Position",
+                    value=fieldValue,
+                    inline=True
+                )
+            )
+
+        embed = interactions.Embed(
+            title=f"Alle Monde",
+            description= f"{len(galaxyMoons)} Monde in Galaxy: {galaxy}",
+            fields = moonFields
+        )
+        
+        await ctx.send(embeds=embed)
 
     @interactions.extension_command(
         name="alliance_position",
@@ -482,7 +547,7 @@ class Planet(interactions.Extension):
         
         return planetFields
 
-    def _checkValidPosition(self, galaxy:int, system:int, position:int):
+    def _checkValidPosition(self, galaxy:int, system:int = 1, position:int = 1):
         
         if galaxy < 1 or galaxy > 4:
             raise ValueError("Galaxy muss zwischen 1 und 4 liegen")
