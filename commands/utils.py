@@ -74,8 +74,14 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
+            - Der letzten X tage. /stats [username] [optional Zeitfesnster]
+            - Prozentuales Punktewachstum eines oder mehrere Spieler (vergleichbar)
+                - chart mit Trendlinine
+            - Playerhistory. Zusätzlich speichern Wenn sich name oder Allianz ändert
+              (aktuell wird überschrieben)
+            - Notify
+                - Warnung bei Phalax +1 scannbar
             - Mond Map
-            - Mond range (monde die einen Planeten scannen können)
             - Allianz Plazierung pro update ausrechnen und speichern
             - DB statistik (anzahl planeten,statseinträge,...)
                 (weil ich daten Geil finde!)"""
