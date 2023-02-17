@@ -361,13 +361,13 @@ class DB():
             self._writeStats(player)
         self._logger.debug("Complete Player write complete count: %s",len(players))
     
-    def setAuthorization(self, userId:str , role:int):
+    def setAuthorization(self, userId:str , role:int, username:str):
         sql = """INSERT INTO public.authorization(
-            "userId", "roleId")
-            VALUES (%s, %s) ON CONFLICT ("userId") DO UPDATE
+            "userId", "roleId", "username")
+            VALUES (%s, %s, %s) ON CONFLICT ("userId") DO UPDATE
                 SET "roleId" = excluded."roleId";"""
         
-        self._write(sql,(userId, role))
+        self._write(sql,(userId, role, username))
     
     def setMoon(self, playerId:str, galaxy:int, system:int, position:int, moon:bool):
         sql = """UPDATE PUBLIC."planet"

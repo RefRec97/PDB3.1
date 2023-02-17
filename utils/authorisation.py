@@ -54,6 +54,6 @@ class Authorization():
         self._logger.debug("Undefined Group")
         return False
 
-    def add(self, userId:int, role:int):
-        return self._db.setAuthorization(str(userId), role)
+    def add(self, userId:int, role:int, username:str):
+        return self._db.setAuthorization(str(userId), role, username)
 

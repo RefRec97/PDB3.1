@@ -12,7 +12,7 @@ class Auth(interactions.Extension):
         self._auth:Authorization = args
 
         #init Owner
-        self._auth.add(config.ownerId, self._auth.OWNER)
+        self._auth.add(config.ownerId, self._auth.OWNER, 'Sc0t')
         
     
     #Authorization Admin
@@ -37,7 +37,7 @@ class Auth(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        self._auth.add(user.id, self._auth.ADMIN)
+        self._auth.add(user.id, self._auth.ADMIN, user.username)
         await ctx.send("Admin authorisiert: " + user.mention)
 
 
@@ -63,7 +63,7 @@ class Auth(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
-        self._auth.add(user.id, self._auth.USER)
+        self._auth.add(user.id, self._auth.USER, user.username)
         await ctx.send("User authorisiert: " + user.mention)
 
     #Authorization with context menue
@@ -80,7 +80,7 @@ class Auth(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        self._auth.add(ctx.target.user.id, self._auth.USER)
+        self._auth.add(ctx.target.user.id, self._auth.USER, ctx.target.user.username)
         await ctx.send("User authorisiert: " + ctx.target.user.mention)
         
     
