@@ -74,6 +74,8 @@ class Bot(interactions.Extension):
         
         featureLIst = """
         Geplante Features (ungeordnet):
+            - Inacitve erweitern mit optinalen Parameter
+                - min/max Inactive Datenpunkte
             - Der letzten X tage. /stats [username] [optional Zeitfesnster]
             - Prozentuales Punktewachstum eines oder mehrere Spieler (vergleichbar)
                 - chart mit Trendlinine
