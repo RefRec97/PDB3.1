@@ -531,6 +531,7 @@ class Planet(interactions.Extension):
         ],
     )
     async def spy(self, ctx: interactions.CommandContext, file:interactions.Attachment):
+        #Refactor
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
@@ -615,18 +616,24 @@ class Planet(interactions.Extension):
                     #mot mapped ids are buildings
                     continue
 
-            #Update Sensor Phalanx 
-            if result["sensor"] is not None:
-                planet = self._db.getPlanet(result["gal"],result["sys"],result["pos"])
-                await self._notify.checkSensor(planet,int(result["sensor"]))
-                self._db.setSensor(planet[1],result["gal"],result["sys"],result["pos"],int(result["sensor"]))
+            #Update Sensor Phalanx
+            planet = self._db.getPlanet(result["gal"],result["sys"],result["pos"])
+            if planet[7] < result["timestamp"]:
+                if result["sensor"] is not None:
+                    await self._notify.checkSensor(planet,int(result["sensor"]))
+                    self._db.setSensor(planet[1],result["gal"],result["sys"],result["pos"],int(result["sensor"]))
+        
             
             #Update Research
             #only if all research is found
-            if all([i is not None for i in [result["weapon"],result["shield"],result["armor"]]]):
-                self._db.setResearchAttack(result["playerId"],result["weapon"],result["shield"],result["armor"])
-            if all([i is not None for i in [result["combustion"],result["impulse"],result["hyperspace"]]]):
-                self._db.setResearchDrive(result["playerId"],result["combustion"], result["impulse"],result["hyperspace"])
+            currentResearch = self._db.getResearch(result["playerId"])
+            if currentResearch is not None:
+                if currentResearch[6] < result["timestamp"]:
+                    if all([i is not None for i in [result["weapon"],result["shield"],result["armor"]]]):
+                        
+                        self._db.setResearchAttack(result["playerId"],result["weapon"],result["shield"],result["armor"])
+                    if all([i is not None for i in [result["combustion"],result["impulse"],result["hyperspace"]]]):
+                        self._db.setResearchDrive(result["playerId"],result["combustion"], result["impulse"],result["hyperspace"])
 
             #Insert Data into Table
             self._db.setSpyReport(spyId, result["playerId"], result["type"], result["gal"], result["sys"], result["pos"],
