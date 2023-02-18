@@ -17,14 +17,14 @@ def main():
         filename= datetime.datetime.now().strftime("%Y-%m-%d_%H-%M.log"),
         encoding='utf-8',
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=logging.INFO
+        level=logging.DEBUG
     )
     logger = logging.getLogger(__name__)
 
     logger.info("Startup")
     
     #Create Bot
-    client = interactions.Client(token=config.prodToken)
+    client = interactions.Client(token=config.devToken)
 
     #Utils
     db = DB(prod = True)

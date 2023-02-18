@@ -34,19 +34,16 @@ def updatePlanet(playerId:str, galaxy:int, system:int, position:int, moon:bool, 
     _write(sql,(playerId, galaxy, system, position, moon, timestamp))
 
 
-def getPlanet(gal,sys,pos):
-    sql = """SELECT
-        "playerId",
+def getAllPlanets():
+    sql = """SELECT "playerId",
         "galaxy",
         "system",
         "position",
+        "moon",
         "timestamp"
-    FROM PUBLIC.PLANET
-        WHERE planet."galaxy"= %s
-        AND planet."system"= %s
-        and planet."position"= %s"""
+    FROM PUBLIC.PLANET"""
     
-    return _read(sql,(gal,sys,pos))
+    return _read(sql,())
 
 
 def _write(sql, data):
@@ -56,13 +53,51 @@ def _write(sql, data):
 
 def _read(sql, data):
     _cur.execute(sql,data)
-    data = _cur.fetchone()
+    data = _cur.fetchall()
 
     return data
 
+def isNotEqualPlanet(p1,p2):
+    
+    if p1["playerId"] != p2["playerId"]:
+        return True
+    if p1["moon"] != p2["moon"]:
+        return True
+
+    return False
 
 def main():
-    with open('data.json',encoding='utf-8') as json_data:
+
+    changes = 0
+    skipped = 0
+    newmoon = 0
+
+    currentPlanets = {}
+    
+    for planet in getAllPlanets():
+        current = {
+            "playerId": str(planet[0]),
+            "galaxy": str(planet[1]),
+            "system": str(planet[2]),
+            "position": str(planet[3]),
+            "moon" : planet[4],
+            "timestamp":planet[5]
+        }
+
+        if current["galaxy"] not in currentPlanets:
+            currentPlanets[current["galaxy"]] = {}
+        
+        if current["system"] not in currentPlanets[current["galaxy"]]:
+            currentPlanets[current["galaxy"]][current["system"]] = {}
+
+        if current["position"] not in currentPlanets[current["galaxy"]][current["system"]]:
+            currentPlanets[current["galaxy"]][current["system"]][current["position"]] = {}
+
+
+        currentPlanets[current["galaxy"]][current["system"]][current["position"]] = current
+
+
+    with open('g4.json',encoding='utf-8') as json_data:
         data = json.load(json_data)
 
     for key,value in data[0].items():
@@ -75,15 +110,16 @@ def main():
             timestamp = value["timepoint"]/1000
         except:
             print("ERROR ^^")
+
         for pos,value in value.items():
             #skip timepoint
             if pos == 'timepoint':
                 continue
-            current = getPlanet(gal,sys,pos)
-            new = datetime.datetime.fromtimestamp(timestamp)
+
+            newTimestamp = datetime.datetime.fromtimestamp(timestamp)
 
             try:
-                if current[4] >= new:
+                if currentPlanets[gal][sys][pos]["timestamp"] >= newTimestamp:
                     #continue on older data in json
                     continue
             except:
@@ -92,11 +128,48 @@ def main():
 
             if value:
                 #set
-                updatePlanet(value['playerid'],gal,sys,pos,value['hasmoon'],new)
+                new = {
+                    "playerId": value['playerid'],
+                    "galaxy": gal,
+                    "system": sys,
+                    "position": pos,
+                    "moon" : value['hasmoon'],
+                    "timestamp": newTimestamp
+                }
+                if isNotEqualPlanet(new,currentPlanets[gal][sys][pos]):
+                    updatePlanet(new['playerId'],gal,sys,pos,new["moon"],newTimestamp)
+                    changes+=1
+                    if new["moon"] == True and currentPlanets[gal][sys][pos]["moon"] == False:
+                        newmoon +=1
+                else:
+                    skipped +=1
+                    
+               
             else:
                 #del
-                updatePlanet(-1,gal,sys,pos,False,new)
+                new = {
+                    "playerId": '-1',
+                    "galaxy": gal,
+                    "system": sys,
+                    "position": pos,
+                    "moon" : False,
+                    "timestamp": newTimestamp
+                }
+                if isNotEqualPlanet(new,currentPlanets[gal][sys][pos]):
+                    updatePlanet(-1,gal,sys,pos,False,newTimestamp)
+                    changes+=1
+                else:
+                    skipped +=1  
 
+        
+    print("changes:")
+    print(changes)
+
+    print("skipped:")
+    print(skipped)
+
+    print("newMoon:")
+    print(newmoon)
 
 if __name__ == "__main__":
     main()

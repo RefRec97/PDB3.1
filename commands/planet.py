@@ -1,9 +1,14 @@
 import interactions
 import logging
+import json
+import datetime
+
+import config
 from utils.authorisation import Authorization
 from utils.db import DB
 from utils.statsCreator import StatsCreator
 from utils.notify import Notify
+
 
 class Planet(interactions.Extension):
     def __init__(self, client, args):
@@ -512,6 +517,128 @@ class Planet(interactions.Extension):
             fields= self._getAlliancePlanetFields(alliancePlanets)
         )
         await ctx.send(embeds=planetEmbed)
+
+    @interactions.extension_command(
+        name="spy",
+        description="Hochladen von spy Report auswertungen des Scripts",
+        options = [
+            interactions.Option(
+                name="file",
+                description="Spioreport",
+                type=interactions.OptionType.ATTACHMENT,
+                required=True
+            ),
+        ],
+    )
+    async def spy(self, ctx: interactions.CommandContext, file:interactions.Attachment):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+
+        if not self._auth.check(ctx.user.id, ctx.command.name):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+        
+        byteStream = (await file.download())
+        spyJson = json.load(byteStream)
+
+        version = spyJson["header"]["version"]
+        if not (version["major"] == 3 and version["minor"] == 0):
+            await ctx.send(f"Script version nicht mehr unterstützt. Bitte updaten und lokaler Speicher löschen!\nBei fragen <@!{config.ownerId}>", ephemeral=True)
+            return
+
+        idx = 0
+        amountOfSpyReports = len(spyJson["data"])
+        await ctx.send(f"Starting Import... {idx}/{amountOfSpyReports}")
+        for spyId,spyData in spyJson["data"].items():
+            idx+=1
+            result = {
+                "reportId": spyId,
+                "type": 2 if spyData["isMoon"] else 1, #1 = Planet, 2 = Moon
+                "playerId": self._db.getPlayerData(spyData["playerName"])[1],
+                "gal": spyData["gal"],
+                "sys": spyData["sys"],
+                "pos": spyData["pos"],
+                "simu": spyData["simu"],
+                "timestamp": datetime.datetime.strptime(spyData["timestamp"],'%d. %b %Y, %H:%M:%S')
+            }
+
+            #simulation link mapping
+            mapping = {
+                "901": "metal",
+                "902": "crystal",
+                "903": "deuterium",
+                "109": "weapon",
+                "110": "shield",
+                "111": "armor",
+                "115": "combustion",
+                "117": "impulse",
+                "118": "hyperspace",
+                "202": "kt",
+                "203": "gt",
+                "204": "lj",
+                "205": "sj",
+                "206": "xer",
+                "207": "ss",
+                "208": "kolo",
+                "209": "rec",
+                "210": "spio",
+                "211": "b",
+                "212": "sats",
+                "213": "z",
+                "214": "rip",
+                "215": "sxer",
+                "401": "rak",
+                "402": "ll",
+                "403": "sl",
+                "404": "gauss",
+                "405": "ion",
+                "406": "plas",
+                "407": "klsk",
+                "408": "grsk",
+                "42": "sensor"
+            }
+            for key,value in mapping.items():
+                result[value] = None
+
+            simu = spyData["simu"]
+            if not '&' in simu:
+                continue
+            
+            for parameter in simu.split("&")[1:]:
+                value = parameter.split("=",1)[1]
+                key = parameter.split("[")[1].split("]")[0]
+                
+                if "." in value:
+                    value = value.split(".")[0]
+                try:
+                    result[mapping[key]] = value
+                except:
+                    #mot mapped ids are buildings
+                    continue
+
+            #Update Sensor Phalanx 
+            if result["sensor"] is not None:
+                planet = self._db.getPlanet(result["gal"],result["sys"],result["pos"])
+                await self._notify.checkSensor(planet,int(result["sensor"]))
+                self._db.setSensor(planet[1],result["gal"],result["sys"],result["pos"],int(result["sensor"]))
+            
+            #Update Research
+            #only if all research is found
+            if all([i is not None for i in [result["weapon"],result["shield"],result["armor"]]]):
+                self._db.setResearchAttack(result["playerId"],result["weapon"],result["shield"],result["armor"])
+            if all([i is not None for i in [result["combustion"],result["impulse"],result["hyperspace"]]]):
+                self._db.setResearchDrive(result["playerId"],result["combustion"], result["impulse"],result["hyperspace"])
+
+            #Insert Data into Table
+            self._db.setSpyReport(spyId, result["playerId"], result["type"], result["gal"], result["sys"], result["pos"],
+                                  result["metal"], result["crystal"], result["deuterium"], result["kt"], result["gt"],
+                                  result["lj"], result["sj"], result["xer"], result["ss"], result["kolo"], result["rec"],
+                                  result["spio"], result["b"], result["sats"], result["z"], result["rip"], result["sxer"],
+                                  result["sxer"], result["ll"], result["sl"], result["gauss"], result["ion"],
+                                  result["plas"], result["klsk"], result["grsk"], result["simu"])
+            #Send Progress Update
+            if idx%5==0:
+                await ctx.edit(f"Wroking... {idx}/{amountOfSpyReports}")
+        await ctx.edit(f"Done... {idx}/{amountOfSpyReports}")
 
     def _getAlliancePlanetFields(self,alliancePlanets):
         sortedPlanets = sorted(alliancePlanets, key = lambda x: (x[2], x[3], x[4]))

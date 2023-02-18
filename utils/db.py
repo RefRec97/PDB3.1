@@ -312,6 +312,23 @@ class DB():
 
         return self._read(sql,(type,))
 
+    def getPlanet(self, gal:int, sys:int, pos:int):
+        sql = """ SELECT "dbKey",
+            "playerId",
+            GALAXY,
+            SYSTEM,
+            position,
+            MOON,
+            "sensorPhalanx",
+            "timestamp"
+        FROM PUBLIC.PLANET
+        WHERE planet."galaxy" = %s
+        AND planet."system" = %s
+        AND planet."position" = %s"""
+
+        return self._readOne(sql,(gal,sys,pos))
+
+
     def getScoreForExpo(self):
         sql = """SELECT STATS."score"
             FROM PUBLIC."stats"
@@ -320,6 +337,45 @@ class DB():
             LIMIT 2"""
         
         return self._read(sql,())
+
+    def setSpyReport(self, reportId, playerId, type, galaxy, system, position, metal, crystal, deuterium, kt, gt, lj ,sj ,xer, ss,
+                     kolo, rec, spio, b, stats, z, rip, sxer, rak, ll, sl, gauss, ion, plas, klsk, grsk, simu):
+        sql = """INSERT INTO PUBLIC.SPYREPORT("reportId",
+            "playerId",
+            TYPE,
+            GALAXY,
+            SYSTEM,
+            "position",
+            METAL,
+            CRYSTAL,
+            DEUTERIUM,
+            KT,
+            GT,
+            LJ,
+            SJ,
+            XER,
+            SS,
+            KOLO,
+            REC,
+            SPIO,
+            B,
+            SATS,
+            Z,
+            RIP,
+            SXER,
+            RAK,
+            LL,
+            SL,
+            GAUSS,
+            ION,
+            PLAS,
+            KLSK,
+            GRSK,
+            SIMU)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+
+        self._write(sql,(reportId, playerId, type, galaxy, system, position, metal, crystal, deuterium, kt, gt, lj ,sj ,xer, ss,
+                         kolo, rec, spio, b, stats, z, rip, sxer, rak, ll, sl, gauss, ion, plas, klsk, grsk, simu))
 
     def setNotify(self, channelId:str, type:str, guildID:str=None, playerId:str=None):
         sql = """INSERT INTO public.notify(

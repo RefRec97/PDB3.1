@@ -52,7 +52,7 @@ class Notify():
             found = False
             field = interactions.EmbedField(
                     inline=False,
-                    name="Positionen",
+                    name="Deine Planeten",
                     value=""
                 )
             for planet in playerPlanets:
