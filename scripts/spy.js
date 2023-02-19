@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Spio
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.1
 // @description  try to take over the world!
 // @author       Sc0t
 // @match        https://pr0game.com/uni2/game.php?page=messages&category=0*
@@ -23,7 +23,7 @@
         var table = document.getElementsByTagName("table")[2]
         var messages = table.getElementsByClassName("messages_body")
 
-        let data = GM_getValue("msgData",{})
+        let data = GM_getValue("msgDatav3",{})
         for (let element of messages) {
             if(element.firstElementChild.firstElementChild.firstElementChild === null){
                 continue
@@ -63,16 +63,16 @@
                 data[id] = tmp
             }
         }
-        GM_setValue("msgData",data)
+        GM_setValue("msgDatav3",data)
         addButtons(data)
     }
 
     function clear(){
         //Clear Data
-        let data = GM_getValue("msgData",{})
+        let data = GM_getValue("msgDatav3",{})
         let amount = Object.keys(data).length
         data = {}
-        GM_setValue("msgData",data)
+        GM_setValue("msgDatav3",data)
 
         //Set message
         document.getElementById("p-info").innerText = "Lokaler Speicher zurückgesetzt"

@@ -542,7 +542,7 @@ class Planet(interactions.Extension):
         spyJson = json.load(byteStream)
 
         version = spyJson["header"]["version"]
-        if not (version["major"] == 3 and version["minor"] == 0):
+        if not (version["major"] == 3 and version["minor"] >= 0):
             await ctx.send(f"Script version nicht mehr unterstützt. Bitte updaten und lokaler Speicher löschen!\nBei fragen <@!{config.ownerId}>", ephemeral=True)
             return
 
