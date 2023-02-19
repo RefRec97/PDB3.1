@@ -8,8 +8,8 @@
 // @match        http://pr0game.com/uni2/game.php?page=messages&category=0*
 // @match        http://37.221.67.168/uni2/game.php?page=messages&category=0*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=pr0game.com
-// @updateURL    https://gist.githubusercontent.com/7Surfer/c3b20a900610418eb2e01ecf5cb26b41/raw
-// @downloadURL  https://gist.githubusercontent.com/7Surfer/c3b20a900610418eb2e01ecf5cb26b41/raw
+// @updateURL    https://raw.githubusercontent.com/7Surfer/PDB3/main/scripts/spy.js
+// @downloadURL  https://raw.githubusercontent.com/7Surfer/PDB3/main/scripts/spy.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        unsafeWindow
