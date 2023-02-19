@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Spio
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      3.2
 // @description  try to take over the world!
 // @author       Sc0t
 // @match        https://pr0game.com/uni2/game.php?page=messages&category=0*
