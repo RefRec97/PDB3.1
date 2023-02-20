@@ -292,6 +292,7 @@ class Stats(interactions.Extension):
     
     #Confirm Drive Research Modal
     @interactions.extension_modal("modal_research_drive")
+    @interactions.autodefer(delay=5)
     async def modal_research_drive_save(self, ctx:interactions.ComponentContext, combustion:str, impulse:str, hyperspace:str):
         self._logger.info("Modal Confirmed from: %s", ctx.user.username)
         self._logger.debug("Arguments: %s", str((combustion,impulse,hyperspace)))
