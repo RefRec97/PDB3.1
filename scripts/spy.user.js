@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name         Spio
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.3
 // @description  try to take over the world!
 // @author       Sc0t
 // @match        https://pr0game.com/uni2/game.php?page=messages&category=0*
 // @match        http://pr0game.com/uni2/game.php?page=messages&category=0*
 // @match        http://37.221.67.168/uni2/game.php?page=messages&category=0*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=pr0game.com
-// @updateURL    https://raw.githubusercontent.com/7Surfer/PDB3/main/scripts/spy.js
-// @downloadURL  https://raw.githubusercontent.com/7Surfer/PDB3/main/scripts/spy.js
+// @updateURL    https://raw.githubusercontent.com/7Surfer/PDB3/main/scripts/spy.user.js
+// @downloadURL  https://raw.githubusercontent.com/7Surfer/PDB3/main/scripts/spy.user.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        unsafeWindow
