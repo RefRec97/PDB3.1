@@ -312,6 +312,7 @@ class Planet(interactions.Extension):
             )
         ]
     )
+    @interactions.autodefer(delay=5)
     async def phalanx(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
@@ -546,6 +547,42 @@ class Planet(interactions.Extension):
             await ctx.send(f"Script version nicht mehr unterstützt. Bitte updaten und lokaler Speicher löschen!\nBei fragen <@!{config.ownerId}>", ephemeral=True)
             return
 
+        #simulation link mapping
+        mapping = {
+            "901": "metal",
+            "902": "crystal",
+            "903": "deuterium",
+            "109": "weapon",
+            "110": "shield",
+            "111": "armor",
+            "115": "combustion",
+            "117": "impulse",
+            "118": "hyperspace",
+            "202": "kt",
+            "203": "gt",
+            "204": "lj",
+            "205": "sj",
+            "206": "xer",
+            "207": "ss",
+            "208": "kolo",
+            "209": "rec",
+            "210": "spio",
+            "211": "b",
+            "212": "sats",
+            "213": "z",
+            "214": "rip",
+            "215": "sxer",
+            "401": "rak",
+            "402": "ll",
+            "403": "sl",
+            "404": "gauss",
+            "405": "ion",
+            "406": "plas",
+            "407": "klsk",
+            "408": "grsk",
+            "42": "sensor"
+        }
+
         idx = 0
         amountOfSpyReports = len(spyJson["data"])
         await ctx.send(f"Starting Import... {idx}/{amountOfSpyReports}")
@@ -562,41 +599,6 @@ class Planet(interactions.Extension):
                 "timestamp": datetime.datetime.strptime(spyData["timestamp"],'%d. %b %Y, %H:%M:%S')
             }
 
-            #simulation link mapping
-            mapping = {
-                "901": "metal",
-                "902": "crystal",
-                "903": "deuterium",
-                "109": "weapon",
-                "110": "shield",
-                "111": "armor",
-                "115": "combustion",
-                "117": "impulse",
-                "118": "hyperspace",
-                "202": "kt",
-                "203": "gt",
-                "204": "lj",
-                "205": "sj",
-                "206": "xer",
-                "207": "ss",
-                "208": "kolo",
-                "209": "rec",
-                "210": "spio",
-                "211": "b",
-                "212": "sats",
-                "213": "z",
-                "214": "rip",
-                "215": "sxer",
-                "401": "rak",
-                "402": "ll",
-                "403": "sl",
-                "404": "gauss",
-                "405": "ion",
-                "406": "plas",
-                "407": "klsk",
-                "408": "grsk",
-                "42": "sensor"
-            }
             for key,value in mapping.items():
                 result[value] = None
 
@@ -623,7 +625,6 @@ class Planet(interactions.Extension):
                     await self._notify.checkSensor(planet,int(result["sensor"]))
                     self._db.setSensor(planet[1],result["gal"],result["sys"],result["pos"],int(result["sensor"]))
         
-            
             #Update Research
             #only if all research is found
             currentResearch = self._db.getResearch(result["playerId"])
