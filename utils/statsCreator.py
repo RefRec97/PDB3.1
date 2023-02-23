@@ -170,7 +170,7 @@ class StatsCreator():
                     enemyMoon+=1
         
         if enemyMoon > 0 or friendlyMoon > 0:
-            result =  f":exclamation: {enemyMoon}\u2001\u2001:heart: {friendlyMoon}"
+            result =  f":exclamation: {enemyMoon}\u2001\u2001:green_heart: {friendlyMoon}"
 
         return result
         
