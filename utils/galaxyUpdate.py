@@ -129,7 +129,7 @@ def main():
             if value:
                 #set
                 new = {
-                    "playerId": value['playerid'],
+                    "playerId": str(value['playerid']),
                     "galaxy": gal,
                     "system": sys,
                     "position": pos,
