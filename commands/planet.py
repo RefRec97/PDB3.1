@@ -645,8 +645,8 @@ class Planet(interactions.Extension):
                                   result["plas"], result["klsk"], result["grsk"], result["simu"])
             #Send Progress Update
             if idx%5==0:
-                await ctx.edit(f"Wroking... {idx}/{amountOfSpyReports}")
-        await ctx.edit(f"Done... {idx}/{amountOfSpyReports}")
+                await ctx.edit(f"Working... {idx}/{amountOfSpyReports}")
+        await ctx.edit(f"Done {idx}/{amountOfSpyReports}")
 
     def _getAlliancePlanetFields(self,alliancePlanets):
         sortedPlanets = sorted(alliancePlanets, key = lambda x: (x[2], x[3], x[4]))
