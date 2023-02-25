@@ -2,6 +2,7 @@
 import logging
 import interactions
 from utils.db import DB
+import config
 
 class Notify():
     CHANNEL = "1"
@@ -39,9 +40,13 @@ class Notify():
             await target.send(message)
     
     async def notifySingleUser(self, message, target):
-        
-        target = await interactions.get(self._client, interactions.Member, parent_id=target[2], object_id=target[0])
-        
+        try:
+            target = await interactions.get(self._client, interactions.Member, parent_id=target[2], object_id=target[0])
+        except:
+            self._logger.error("Failed to get User")
+            target = await interactions.get(self._client, interactions.Member, parent_id=config.devDiscordId, object_id=config.ownerId)
+            await target.send("Error on ", embeds=message)
+            return
         await target.send(embeds=message)
 
     async def checkSensor(self,moon,newLevel):
