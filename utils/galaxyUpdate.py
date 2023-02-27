@@ -71,6 +71,7 @@ def main():
     changes = 0
     skipped = 0
     newmoon = 0
+    moonPos = []
 
     currentPlanets = {}
     
@@ -141,6 +142,7 @@ def main():
                     changes+=1
                     if new["moon"] == True and currentPlanets[gal][sys][pos]["moon"] == False:
                         newmoon +=1
+                        moonPos.append((gal,sys,pos))
                 else:
                     skipped +=1
                     
@@ -170,6 +172,9 @@ def main():
 
     print("newMoon:")
     print(newmoon)
+
+    for moon in moonPos:
+        print(f'{moon[0]}:{moon[1]}:{moon[2]}')
 
 if __name__ == "__main__":
     main()

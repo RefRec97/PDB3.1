@@ -30,10 +30,14 @@ class ChartCreator():
     DEBRISCRYSTAL = "14"
     UNITSDESTROYED = "15"
     UNITSLOST = "16"
+    REALDEBRISMETAL = "17"
+    REALDEBRISCRYSTAL = "18"
+    REALUNITSDESTROYED = "19"
 
     #Group Options to Axis
     _highAxis = [SCORE, RESEARCHSCORE, BUILDINGSCORE, DEFENSIVESCORE, FLEETSCORE,
-        DEBRISMETAL, DEBRISCRYSTAL, UNITSDESTROYED, UNITSLOST]
+        DEBRISMETAL, DEBRISCRYSTAL, UNITSDESTROYED, UNITSLOST, REALDEBRISMETAL,
+        REALDEBRISCRYSTAL,REALUNITSDESTROYED]
     _lowAxis = [RANK, RESEARCHRANK, BUILDINGRANK, DEFENSIVERANK, FLEETRANK,
         BATTLESWON, BATTLESLOST, BATTLESDRAW]
     
@@ -123,7 +127,10 @@ class ChartCreator():
                 "debrisMetal": [],
                 "debrisCrystal": [],
                 "unitsDestroyed": [],
-                "unitsLost": []
+                "unitsLost": [],
+                "realDebrisMetal":[],
+                "realDebrisCrystal":[],
+                "realUnitsDestroyed":[]
             }
 
             for datapoint in reversed(user):
@@ -145,6 +152,10 @@ class ChartCreator():
                 chartData["debrisCrystal"].append({"x":time, "y":datapoint[15]})
                 chartData["unitsDestroyed"].append({"x":time, "y":datapoint[16]})
                 chartData["unitsLost"].append({"x":time, "y":datapoint[17]})
+                chartData["realDebrisMetal"].append({"x":time, "y":datapoint[19]})
+                chartData["realDebrisCrystal"].append({"x":time, "y":datapoint[20]})
+                chartData["realUnitsDestroyed"].append({"x":time, "y":datapoint[21]})
+                
 
             userChartData.append(chartData)
 
@@ -200,6 +211,12 @@ class ChartCreator():
             label = "Trümmerfeld Kristall"
         elif type == self.UNITSDESTROYED:
             label = "Zerstörte Einheiten"
+        elif type == self.UNITSLOST:
+            label = "Verlorene Einheiten"
+        elif type == self.UNITSLOST:
+            label = "Verlorene Einheiten"
+        elif type == self.UNITSLOST:
+            label = "Verlorene Einheiten"
         elif type == self.UNITSLOST:
             label = "Verlorene Einheiten"
                  
@@ -498,6 +515,30 @@ class ChartCreator():
                     "yAxisID": "highAxis",
                     "label": "Verlorene Einheiten",
                     "data": chartData["unitsLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.REALDEBRISMETAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Real Trümmerfeld Metall",
+                    "data": chartData["realDebrisMetal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.REALDEBRISCRYSTAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Real Trümmerfeld Kristall",
+                    "data": chartData["realDebrisCrystal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.REALUNITSDESTROYED:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Real Verlorene Einheiten",
+                    "data": chartData["realUnitsDestroyed"],
                     "fill": False,
                     "pointRadius": 1}
                 )

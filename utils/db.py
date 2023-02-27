@@ -131,14 +131,15 @@ class DB():
         sql = """INSERT INTO public.stats(
             "rank", "score", "researchRank", "researchScore", "buildingRank", "buildingScore",
             "defensiveRank", "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost",
-            "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId")
-            VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+            "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId",
+            "realDebrisMetal", "realDebrisCrystal", "realUnitsDestroyed")
+            VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         
         self._write(sql,(player.rank, player.score, player.researchRank, player.researchScore, player.buildingRank,
             player.buildingScore, player.defensiveRank, player.defensiveScore, player.fleetRank,
             player.fleetScore, player.battlesWon, player.battlesLost, player.battlesDraw,
             player.debrisMetal, player.debrisCrystal, player.unitsDestroyed, player.unitsLost,
-            player.playerId))
+            player.playerId, player.realDebrisMetal, player.realDebrisCrystal, player.realUnitsDestroyed))
 
     def getAuthRole(self, userID:str):
         sql = """ SELECT "roleId" FROM public.authorization
@@ -150,7 +151,11 @@ class DB():
             return -1
 
     def getPlayerStats(self, playerId:str):
-        sql = """SELECT * from public."stats"
+
+        sql = """SELECT "dbKey", rank, score, "researchRank", "researchScore", "buildingRank", "buildingScore", "defensiveRank",
+            "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost", "battlesDraw", "debrisMetal", "debrisCrystal",
+            "unitsDestroyed", "unitsLost", "playerId", "realDebrisMetal", "realDebrisCrystal", "realUnitsDestroyed", "timestamp"
+            FROM public.stats
             where stats."playerId" = %s
             ORDER BY stats."timestamp" DESC"""
 
