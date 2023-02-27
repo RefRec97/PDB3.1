@@ -30,7 +30,7 @@ class Update():
     async def force(self):
         #update evrything here
         await self._updateStats()
-        await self._checkExpoCap()
+        await self._notify.checkExpoCap()
         
 
     async def _tick(self):
@@ -75,6 +75,8 @@ class Update():
                     player.allianceName = '-'
                 
                 player.playerName = player.playerName
+                player.realDebrisMetal = float(player.realDebrisMetal)
+                player.realDebrisCrystal = float(player.realDebrisCrystal)
 
                 players.append(player)  
 
