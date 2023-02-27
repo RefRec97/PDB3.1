@@ -57,7 +57,7 @@ class StatsCreator():
             title=f"{playerData[2]}",
             description= f"{playerData[1]}\n{allianceData[2]}", #PlayerId and Alliance Name
             fields = statsFields,
-            timestamp=playerStats[0][19],
+            timestamp=playerStats[0][22],
             thumbnail=interactions.EmbedImageStruct(
                 url=self._chartCreator.getChartUrl(playerStats,playerData[2],
                         [
