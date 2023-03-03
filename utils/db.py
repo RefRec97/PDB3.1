@@ -350,7 +350,7 @@ class DB():
         return self._read(sql,())
 
     def getLink(self, discordId):
-        sql = """SELECT "playerId" FROM PUBLIC.LINK;
+        sql = """SELECT "playerId" FROM PUBLIC.LINK
                 WHERE "discordId" = %s; """
         
         return self._readOne(sql,(discordId,))
