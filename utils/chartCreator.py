@@ -537,7 +537,7 @@ class ChartCreator():
             elif type == self.REALUNITSDESTROYED:
                 qc.config["data"]["datasets"].append({
                     "yAxisID": "highAxis",
-                    "label": "Real Verlorene Einheiten",
+                    "label": "Real Zerstörte Einheiten",
                     "data": chartData["realUnitsDestroyed"],
                     "fill": False,
                     "pointRadius": 1}

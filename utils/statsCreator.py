@@ -13,10 +13,15 @@ class StatsCreator():
         self._db:DB = db
         self._chartCreator:ChartCreator = chartCreator
 
-    def getStatsContent(self, playerName:str):
-        playerData = self._db.getPlayerData(playerName)
+    def getStatsContentById(self, playerId:str):
+        return self._getStatsContent(self._db.getPlayerDataById(playerId))
+
+    def getStatsContentByName(self, playerName:str):
+        return self._getStatsContent(self._db.getPlayerDataByName(playerName))
+        
+    def _getStatsContent(self, playerData):
         if not playerData:
-            raise ValueError(f"Spieler nicht gefunden: {playerName}")
+            raise ValueError(f"Spieler nicht gefunden")
         
         playerStats = self._db.getPlayerStats(playerData[1])
         allianceData = self._db.getAllianceById(playerData[5])
@@ -102,7 +107,6 @@ class StatsCreator():
             ),
         ]
         return (statsEmbed, interactions.spread_to_rows(*statsComponents))
-
 
     def _getPlanetFields(self, playerId:str):
         planetData = self._db.getPlayerPlanets(playerId)
