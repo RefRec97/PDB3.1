@@ -35,7 +35,7 @@ def main():
     statsCreator = StatsCreator(db, chartCreator)
 
     #Load Commands
-    client.load("commands.utils", args=(authroization, update, notify))
+    client.load("commands.utils", args=(authroization, update, notify, db))
     client.load("commands.auth", args=(authroization))
     client.load("commands.stats", args=(authroization, db, statsCreator, chartCreator))
     client.load("commands.planet", args=(authroization, db, statsCreator, notify))

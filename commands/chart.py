@@ -24,6 +24,9 @@ class Chart(interactions.Extension):
         interactions.Choice(name="Trümmerfeld Kristall", value=ChartCreator.DEBRISCRYSTAL),
         interactions.Choice(name="Zerstörte Einheiten", value=ChartCreator.UNITSDESTROYED),
         interactions.Choice(name="Verlorene Einheiten", value=ChartCreator.UNITSLOST),
+        interactions.Choice(name="Reales Trümmerfeld Metall", value=ChartCreator.REALDEBRISMETAL),
+        interactions.Choice(name="Reales Trümmerfeld Kristall", value=ChartCreator.REALDEBRISCRYSTAL),
+        interactions.Choice(name="Reale Zerstörte Einheiten", value=ChartCreator.REALUNITSDESTROYED),
     ]
 
     def __init__(self, client, args):
@@ -55,7 +58,7 @@ class Chart(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        playerData = self._db.getPlayerData(username)
+        playerData = self._db.getPlayerDataByName(username)
         if not playerData:
             await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return False
@@ -73,6 +76,42 @@ class Chart(interactions.Extension):
                     )
         
         await ctx.send(chartUrl)
+    
+    @interactions.extension_command(
+        name="c",
+        description="Chart des verlinken Spielers",
+    )
+    @interactions.autodefer(delay=5)
+    async def c(self, ctx: interactions.CommandContext):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+
+        if not self._auth.check(ctx.user.id, "chart"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+
+        playerId = self._db.getLink(str(ctx.user.id))
+        if not playerId:
+            await ctx.send(f"Verlinkung nicht gefunden. Bitte verlinke zuerst dein Discord mit Pr0game durch /link", ephemeral=True)
+            return
+
+        playerData = self._db.getPlayerDataById(playerId[0])
+        if not playerData:
+            await ctx.send(f"Spieler nicht gefunden", ephemeral=True)
+            return False
+
+        playerStats = self._db.getPlayerStats(playerData[1])
+        chartUrl = self._chartCreator.getChartUrl(playerStats, playerData[2],
+                        [
+                            self._chartCreator.RANK,
+                            self._chartCreator.SCORE,
+                            self._chartCreator.BUILDINGSCORE,
+                            self._chartCreator.RESEARCHSCORE,
+                            self._chartCreator.FLEETSCORE,
+                            self._chartCreator.DEFENSIVESCORE
+                        ]
+                    )
+        await ctx.send(chartUrl)
+        
     
     @interactions.extension_command(
         name="custom_chart",
@@ -151,7 +190,7 @@ class Chart(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        playerData = self._db.getPlayerData(username)
+        playerData = self._db.getPlayerDataByName(username)
         if not playerData:
             await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return
@@ -241,7 +280,7 @@ class Chart(interactions.Extension):
         allPlayerStats = []
         allPlayerNames = []
         for playerName in names:
-            playerData = self._db.getPlayerData(playerName)
+            playerData = self._db.getPlayerDataByName(playerName)
             
             if not playerData:
                 await ctx.send(f"Spieler nicht gefunden: {playerName}", ephemeral=True)

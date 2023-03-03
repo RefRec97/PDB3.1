@@ -69,7 +69,7 @@ class ManageNotify(interactions.Extension):
             return
         
         if type == Notify.SENSOR_PHALANX:
-            playerData = self._db.getPlayerData(username)
+            playerData = self._db.getPlayerDataByName(username)
             if not playerData:
                 await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
                 return

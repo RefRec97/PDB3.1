@@ -187,11 +187,17 @@ class DB():
 
         return self._read(sql,(playerId,))
 
-    def getPlayerData(self, userName:str):
+    def getPlayerDataByName(self, userName:str):
         sql = """ SELECT * FROM public.player
             WHERE lower(player."playerName")=lower(%s)"""
 
         return self._readOne(sql,(userName,))
+
+    def getPlayerDataById(self, playerId:str):
+        sql = """ SELECT * FROM public.player
+            WHERE player."playerId"=%s"""
+
+        return self._readOne(sql,(playerId,))
     
     def updatePlanet(self, galaxy:int, system:int, position:int, playerId:str=-1):
         sql = """INSERT INTO public.planet(
@@ -343,6 +349,11 @@ class DB():
         
         return self._read(sql,())
 
+    def getLink(self, discordId):
+        sql = """SELECT "playerId" FROM PUBLIC.LINK;"""
+        
+        return self._readOne(sql,(discordId,))
+
     def setSpyReport(self, reportId, playerId, type, galaxy, system, position, metal, crystal, deuterium, kt, gt, lj ,sj ,xer, ss,
                      kolo, rec, spio, b, stats, z, rip, sxer, rak, ll, sl, gauss, ion, plas, klsk, grsk, simu):
         sql = """INSERT INTO PUBLIC.SPYREPORT("reportId",
@@ -388,6 +399,18 @@ class DB():
             VALUES (%s,%s,%s,%s);"""
 
         self._write(sql,(channelId,type,guildID, playerId))
+    
+    def setLink(self, playerId:str, discorId:str, discordName:str):
+        sql = """INSERT INTO public.link(
+            "playerId", "discordId", "discordName")
+            VALUES (%s, %s, %s)
+            on conflict ("discordId") DO UPDATE 
+            SET "playerId" = excluded."playerId",
+                "discordId" = excluded."discordId",
+                "discordName" = excluded."discordName"
+                """
+
+        self._write(sql,(playerId,discorId,discordName))
 
     def setResearchAttack(self, playerId:str, weapon:int, shield:int, armor:int):
         sql = """ INSERT INTO public.research(

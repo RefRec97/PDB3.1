@@ -39,7 +39,36 @@ class Stats(interactions.Extension):
         
         await ctx.send("Working...",embeds=None)
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+        
+        await ctx.edit("",embeds=statsEmbed, components=statsComponent)
+    
+    @interactions.extension_command(
+        name="s",
+        description="Stats des verlinken Spielers",
+    )
+    @interactions.autodefer(delay=5)
+    async def s(self, ctx: interactions.CommandContext):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+
+        if not self._auth.check(ctx.user.id, "stats"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+        
+        await ctx.send("Working...",embeds=None)
+
+
+        playerId = self._db.getLink(str(ctx.user.id))
+        if not playerId:
+            await ctx.send(f"Verlinkung nicht gefunden. Bitte verlinke zuerst dein Discord mit Pr0game durch /link", ephemeral=True)
+            return
+
+        try:
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId[0])
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -58,7 +87,7 @@ class Stats(interactions.Extension):
         
         try:
             #Workaround get playerName from Title
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(ctx.message.embeds[0].title)
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -147,7 +176,7 @@ class Stats(interactions.Extension):
         
         try:
             #Workaround get playerName from Title
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(ctx.message.embeds[0].title)
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -227,7 +256,7 @@ class Stats(interactions.Extension):
 
         try:
             #Workaround get playerName from Title
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(ctx.message.embeds[0].title)
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -308,7 +337,7 @@ class Stats(interactions.Extension):
 
         try:
             #Workaround get playerName from Title
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(ctx.message.embeds[0].title)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(ctx.message.embeds[0].title)
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -354,7 +383,7 @@ class Stats(interactions.Extension):
     @interactions.autodefer(delay=5)
     async def alliancePlayerSelect1(self, ctx:interactions.ComponentContext, value): 
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(value[0])
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -368,7 +397,7 @@ class Stats(interactions.Extension):
     @interactions.autodefer(delay=5)
     async def alliancePlayerSelect2(self, ctx:interactions.ComponentContext, value):
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(value[0])
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -382,7 +411,7 @@ class Stats(interactions.Extension):
     @interactions.autodefer(delay=5)
     async def alliancePlayerSelect3(self, ctx:interactions.ComponentContext, value): 
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(value[0])
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -396,7 +425,7 @@ class Stats(interactions.Extension):
     @interactions.autodefer(delay=5)
     async def alliancePlayerSelect4(self, ctx:interactions.ComponentContext, value): 
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(value[0])
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -410,7 +439,7 @@ class Stats(interactions.Extension):
     @interactions.autodefer(delay=5)
     async def alliancePlayerSelect5(self, ctx:interactions.ComponentContext, value): 
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(value[0])
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(value[0])
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)

@@ -63,7 +63,7 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        playerData = self._db.getPlayerData(username)
+        playerData = self._db.getPlayerDataByName(username)
         if not playerData:
             await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return
@@ -73,7 +73,7 @@ class Planet(interactions.Extension):
         
         await ctx.send("Working...")
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -173,7 +173,7 @@ class Planet(interactions.Extension):
             return
 
         #get userId
-        playerData = self._db.getPlayerData(username)
+        playerData = self._db.getPlayerDataByName(username)
         if not playerData:
             await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return
@@ -190,7 +190,7 @@ class Planet(interactions.Extension):
 
                 await ctx.send("Working...")
                 try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
@@ -248,7 +248,7 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        playerData = self._db.getPlayerData(username)
+        playerData = self._db.getPlayerDataByName(username)
         if not playerData:
             await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return
@@ -265,7 +265,7 @@ class Planet(interactions.Extension):
                 self._db.setMoon(playerData[1],galaxy,system,position,False)
                 await ctx.send("Working...")
                 try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
@@ -328,7 +328,7 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        playerData = self._db.getPlayerData(username)
+        playerData = self._db.getPlayerDataByName(username)
         if not playerData:
             await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
             return
@@ -347,7 +347,7 @@ class Planet(interactions.Extension):
                 
                 await ctx.send("Working...")
                 try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContent(username)
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
@@ -591,7 +591,7 @@ class Planet(interactions.Extension):
             result = {
                 "reportId": spyId,
                 "type": 2 if spyData["isMoon"] else 1, #1 = Planet, 2 = Moon
-                "playerId": self._db.getPlayerData(spyData["playerName"])[1],
+                "playerId": self._db.getPlayerDataByName(spyData["playerName"])[1],
                 "gal": spyData["gal"],
                 "sys": spyData["sys"],
                 "pos": spyData["pos"],
