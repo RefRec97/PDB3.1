@@ -18,20 +18,23 @@ class StatsCreator():
 
     def getStatsContentByName(self, playerName:str):
         return self._getStatsContent(self._db.getPlayerDataByName(playerName))
-        
-    def _getStatsContent(self, playerData):
-        if not playerData:
+
+    def _getStatsContent(self, player):
+        if not player:
             raise ValueError(f"Spieler nicht gefunden")
+        playerName = player[2]
+        playerId = player[1]
+        playerAllianceId = player[5]
         
-        playerStats = self._db.getPlayerStats(playerData[1])
-        allianceData = self._db.getAllianceById(playerData[5])
+        playerStats = self._db.getPlayerStats(playerId)
+        allianceName = self._db.getAllianceById(playerAllianceId)[2]
 
-        currentPlayerStats = playerStats[0]
+        playerStats = self._db.getPlayerStats(playerId)
 
-        currentPlayerStats = self._getCurrentPlayerStats(playerStats[0])
-        diffData = self._getStatsDifference(playerStats)
-
-
+        currentPlayerRank,currentPlayerScore = self._getCurrentPlayerStats(playerStats[0])
+        diffRank, diffScore = self._getStatsDifference(playerStats)
+        
+        
         #Embed Fields
         statsFields = [
             interactions.EmbedField(
@@ -42,29 +45,29 @@ class StatsCreator():
             interactions.EmbedField(
                 inline=True,
                 name="Rang",
-                value= self._getEmbedValueString(currentPlayerStats[0], diffData[0])
+                value= self._getEmbedValueString(currentPlayerRank, diffRank)
             ),
             interactions.EmbedField(
                 inline=True,
                 name="Punkte",
-                value= self._getEmbedValueString(currentPlayerStats[1], diffData[1])
-            )
+                value= self._getEmbedValueString(currentPlayerScore, diffScore)
+            ),
         ]
 
         #Add Planet Data
-        statsFields += self._getPlanetFields(playerData[1])
+        statsFields += self._getPlanetFields(playerId)
 
         #Add Research Data
-        statsFields += self._getResearchFields(playerData[1])
+        statsFields += self._getResearchFields(playerId)
 
         #Create Embed
         statsEmbed = interactions.Embed(
-            title=f"{playerData[2]}",
-            description= f"{playerData[1]}\n{allianceData[2]}", #PlayerId and Alliance Name
+            title=f"{playerName}",
+            description= f"{playerId}\n{allianceName}",
             fields = statsFields,
             timestamp=playerStats[0][22],
             thumbnail=interactions.EmbedImageStruct(
-                url=self._chartCreator.getChartUrl(playerStats,playerData[2],
+                url=self._chartCreator.getChartUrl(playerStats,playerName,
                         [
                             self._chartCreator.RANK,
                             self._chartCreator.SCORE,
@@ -78,7 +81,6 @@ class StatsCreator():
                 width=420
             )
         )
-
         statsComponents = [
             interactions.Button(
                 style=interactions.ButtonStyle.PRIMARY,
@@ -129,19 +131,26 @@ class StatsCreator():
             ),
         ]
 
+        allMoons = self._db.getAllMoons()
+        friendlyPlayerIds = []
+        for entry in self._db.getAllianceMember(326): #Allianz mit Poll
+            friendlyPlayerIds.append(entry[0])
+        for entry in self._db.getAllianceMember(401): #Space Schmuser
+            friendlyPlayerIds.append(entry[0])
         planetData.sort(key=lambda element: (element[2], element[3], element[4]))
         for planet in planetData:
+            # Cords
             planetEmbeds[0].value += f"[{planet[2]}\:{planet[3]}\:{planet[4]}](https://pr0game.com/uni2/game.php?page=galaxy&galaxy={planet[2]}&system={planet[3]})\n"
             
-
+            # Phalanx Range
             value = "-"
             if planet[5] and planet[6] >=0:
                 startSystem, endSystem = self._getPhalanxRange(planet)
                 value = f"{planet[6]}  [{startSystem}-{endSystem}]"
-            
             planetEmbeds[1].value += f"{value}\n"
 
-            planetEmbeds[2].value += f"{self._getOtherPlanetSymbols(planet)}\n"
+            # Friendly/enemy Moons
+            planetEmbeds[2].value += f"{self._getOtherPlanetSymbols(planet, allMoons, friendlyPlayerIds)}\n"
         
         if not planetData:
             planetEmbeds[0].value = "-"
@@ -150,25 +159,22 @@ class StatsCreator():
 
         return planetEmbeds
 
-    def _getOtherPlanetSymbols(self, planet):
+    def _getOtherPlanetSymbols(self, planet, allMoons, friendlyPlayerIds):
         result="-"
-        
-        galaxyMoons = self._db.getAllGalaxyMoons(galaxy=planet[2])
-        
-        friendlyPlayerIds = []
-        for entry in self._db.getAllianceMember(326): #Allianz mit Poll
-            friendlyPlayerIds.append(entry[0])
-        for entry in self._db.getAllianceMember(401): #Space Schmuser
-            friendlyPlayerIds.append(entry[0])
         friendlyMoon = 0
         enemyMoon = 0
 
-        
-        for moon in galaxyMoons:
-            if moon[2] == 0:
+        for moon in allMoons:
+            moonPlayerId = moon[0]
+            moonGalaxy = moon[1]
+            moonSystem = moon[2]
+            moonPhalanx = moon[3]
+            if moonPhalanx == 0 or\
+                    planet[2] != moonGalaxy:
                 continue
-            if self.isPlanetInSensorRange(moon[1],moon[2],planet[3]):
-                if moon[0] in friendlyPlayerIds:
+
+            if self.isPlanetInSensorRange(moonSystem, moonPhalanx,planet[3]):
+                if moonPlayerId in friendlyPlayerIds:
                     friendlyMoon+=1
                 else:
                     enemyMoon+=1
@@ -177,7 +183,6 @@ class StatsCreator():
             result =  f":exclamation: {enemyMoon}\u2001\u2001:green_heart: {friendlyMoon}"
 
         return result
-        
 
     def _getPhalanxRange(self,planet):
         if planet[6] == 0:
@@ -192,7 +197,6 @@ class StatsCreator():
             endSystem -= 400
         
         return startSystem,endSystem
-
 
     def _getResearchFields(self, playerId:str):
 
