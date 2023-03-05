@@ -27,6 +27,7 @@ class Chart(interactions.Extension):
         interactions.Choice(name="Reales Trümmerfeld Metall", value=ChartCreator.REALDEBRISMETAL),
         interactions.Choice(name="Reales Trümmerfeld Kristall", value=ChartCreator.REALDEBRISCRYSTAL),
         interactions.Choice(name="Reale Zerstörte Einheiten", value=ChartCreator.REALUNITSDESTROYED),
+        interactions.Choice(name="Reale Verlorene Einheiten", value=ChartCreator.REALUNITSLOST),
     ]
 
     def __init__(self, client, args):

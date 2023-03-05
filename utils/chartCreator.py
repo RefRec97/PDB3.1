@@ -33,6 +33,7 @@ class ChartCreator():
     REALDEBRISMETAL = "17"
     REALDEBRISCRYSTAL = "18"
     REALUNITSDESTROYED = "19"
+    REALUNITSLOST = "20"
 
     #Group Options to Axis
     _highAxis = [SCORE, RESEARCHSCORE, BUILDINGSCORE, DEFENSIVESCORE, FLEETSCORE,
@@ -76,6 +77,10 @@ class ChartCreator():
             "debrisCrystal": [],
             "unitsDestroyed": [],
             "unitsLost": [],
+            "realDebrisMetal": [],
+            "realDebrisCrystal": [],
+            "realUnitsDestroyed": [],
+            "realUnitsLost":[],
             "labels": []
         }
 
@@ -128,9 +133,10 @@ class ChartCreator():
                 "debrisCrystal": [],
                 "unitsDestroyed": [],
                 "unitsLost": [],
-                "realDebrisMetal":[],
-                "realDebrisCrystal":[],
-                "realUnitsDestroyed":[]
+                "realDebrisMetal": [],
+                "realDebrisCrystal": [],
+                "realUnitsDestroyed": [],
+                "realUnitsLost":[],
             }
 
             for datapoint in reversed(user):
@@ -155,6 +161,7 @@ class ChartCreator():
                 chartData["realDebrisMetal"].append({"x":time, "y":datapoint[19]})
                 chartData["realDebrisCrystal"].append({"x":time, "y":datapoint[20]})
                 chartData["realUnitsDestroyed"].append({"x":time, "y":datapoint[21]})
+                chartData["realUnitsLost"].append({"x":time, "y":datapoint[21]})
                 
 
             userChartData.append(chartData)
@@ -213,12 +220,14 @@ class ChartCreator():
             label = "Zerstörte Einheiten"
         elif type == self.UNITSLOST:
             label = "Verlorene Einheiten"
-        elif type == self.UNITSLOST:
-            label = "Verlorene Einheiten"
-        elif type == self.UNITSLOST:
-            label = "Verlorene Einheiten"
-        elif type == self.UNITSLOST:
-            label = "Verlorene Einheiten"
+        elif type == self.REALDEBRISMETAL:
+            label = "Reales Trümmerfeld Metal"
+        elif type == self.REALDEBRISCRYSTAL:
+            label = "Reales Trümmerfeld Kristall"
+        elif type == self.REALUNITSDESTROYED:
+            label = "Real Zerstörte Einheiten"
+        elif type == self.REALUNITSLOST:
+            label = "Real Verlorene Einheiten"
                  
 
         #Set Default Config
@@ -358,6 +367,38 @@ class ChartCreator():
                     "yAxisID": "highAxis",
                     "label": userName,
                     "data": user["unitsLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.REALDEBRISCRYSTAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["realDebrisCrystal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.REALDEBRISMETAL:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["realDebrisMetal"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.REALUNITSLOST:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["realUnitsLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
+            elif type == self.REALUNITSDESTROYED:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": userName,
+                    "data": user["realUnitsDestroyed"],
                     "fill": False,
                     "pointRadius": 1}
                 )
@@ -542,7 +583,14 @@ class ChartCreator():
                     "fill": False,
                     "pointRadius": 1}
                 )
-
+            elif type == self.REALUNITSLOST:
+                qc.config["data"]["datasets"].append({
+                    "yAxisID": "highAxis",
+                    "label": "Real Verlorene Einheiten",
+                    "data": chartData["realUnitsLost"],
+                    "fill": False,
+                    "pointRadius": 1}
+                )
         
         qc.config["options"]["scales"]["yAxes"] = self._getAxisConfig(types)
         

@@ -2,7 +2,7 @@
 class PlayerStats():
     def __init__(self, playerId, playerName, playerUniverse, playerGalaxy, allianceId, allianceName, rank, score, researchRank, researchScore,
                  buildingRank, buildingScore, defensiveRank, defensiveScore, fleetRank, fleetScore, battlesWon, battlesLost,
-                 battlesDraw, debrisMetal, debrisCrystal, unitsDestroyed, unitsLost, realDebrisMetal, realDebrisCrystal, realUnitsDestroyed):
+                 battlesDraw, debrisMetal, debrisCrystal, unitsDestroyed, unitsLost, realDebrisMetal, realDebrisCrystal, realUnitsDestroyed, realUnitsLost):
 
         self.playerId = playerId
         self.playerName = playerName
@@ -30,6 +30,7 @@ class PlayerStats():
         self.realDebrisMetal = realDebrisMetal
         self.realDebrisCrystal = realDebrisCrystal
         self.realUnitsDestroyed = realUnitsDestroyed
+        self.realUnitsLost = realUnitsLost
 
 
 
