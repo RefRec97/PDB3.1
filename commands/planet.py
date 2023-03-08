@@ -588,10 +588,14 @@ class Planet(interactions.Extension):
         await ctx.send(f"Starting Import... {idx}/{amountOfSpyReports}")
         for spyId,spyData in spyJson["data"].items():
             idx+=1
+            playerData = self._db.getPlayerDataByName(spyData["playerName"])
+            if not playerData:
+                continue
+
             result = {
                 "reportId": spyId,
                 "type": 2 if spyData["isMoon"] else 1, #1 = Planet, 2 = Moon
-                "playerId": self._db.getPlayerDataByName(spyData["playerName"])[1],
+                "playerId": playerData[1],
                 "gal": spyData["gal"],
                 "sys": spyData["sys"],
                 "pos": spyData["pos"],
