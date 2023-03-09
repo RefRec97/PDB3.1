@@ -133,7 +133,7 @@ class DB():
             "defensiveRank", "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost",
             "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId",
             "realDebrisMetal", "realDebrisCrystal", "realUnitsDestroyed", "realUnitsLost")
-            VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+            VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         
         self._write(sql,(player.rank, player.score, player.researchRank, player.researchScore, player.buildingRank,
             player.buildingScore, player.defensiveRank, player.defensiveScore, player.fleetRank,
