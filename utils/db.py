@@ -132,14 +132,15 @@ class DB():
             "rank", "score", "researchRank", "researchScore", "buildingRank", "buildingScore",
             "defensiveRank", "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost",
             "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId",
-            "realDebrisMetal", "realDebrisCrystal", "realUnitsDestroyed")
+            "realDebrisMetal", "realDebrisCrystal", "realUnitsDestroyed", "realUnitsLost)
             VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         
         self._write(sql,(player.rank, player.score, player.researchRank, player.researchScore, player.buildingRank,
             player.buildingScore, player.defensiveRank, player.defensiveScore, player.fleetRank,
             player.fleetScore, player.battlesWon, player.battlesLost, player.battlesDraw,
             player.debrisMetal, player.debrisCrystal, player.unitsDestroyed, player.unitsLost,
-            player.playerId, player.realDebrisMetal, player.realDebrisCrystal, player.realUnitsDestroyed))
+            player.playerId, player.realDebrisMetal, player.realDebrisCrystal, player.realUnitsDestroyed,
+            player.realUnitsLost))
 
     def getAuthRole(self, userID:str):
         sql = """ SELECT "roleId" FROM public.authorization
@@ -157,7 +158,8 @@ class DB():
             "unitsDestroyed", "unitsLost", "playerId", "realDebrisMetal", "realDebrisCrystal", "realUnitsDestroyed", "timestamp"
             FROM public.stats
             where stats."playerId" = %s
-            ORDER BY stats."timestamp" DESC"""
+            ORDER BY stats."timestamp" DESC
+            LIMIT 300"""
 
         return self._read(sql,(playerId,))
 

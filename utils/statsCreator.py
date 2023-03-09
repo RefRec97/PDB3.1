@@ -29,8 +29,6 @@ class StatsCreator():
         playerStats = self._db.getPlayerStats(playerId)
         allianceName = self._db.getAllianceById(playerAllianceId)[2]
 
-        playerStats = self._db.getPlayerStats(playerId)
-
         currentPlayerRank,currentPlayerScore = self._getCurrentPlayerStats(playerStats[0])
         diffRank, diffScore = self._getStatsDifference(playerStats)
         
