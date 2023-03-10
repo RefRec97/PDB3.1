@@ -59,13 +59,12 @@ class Stats(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
-        await ctx.send("Working...",embeds=None)
-
-
         playerId = self._db.getLink(str(ctx.user.id))
         if not playerId:
             await ctx.send(f"Verlinkung nicht gefunden. Bitte verlinke zuerst dein Discord mit Pr0game durch /link", ephemeral=True)
             return
+        
+        await ctx.send("Working...",embeds=None)
 
         try:
             statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId[0])
