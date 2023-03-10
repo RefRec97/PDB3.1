@@ -124,7 +124,7 @@ class StatsCreator():
         
         inactiveDays = (datetime.now()-lastActiveTimestamp).days
         if inactiveDays <= 1:
-            return "*Aktive*"
+            return "*Aktiv*"
         else:
             return f"*Inaktiv seit: {inactiveDays} Tagen*"
 
