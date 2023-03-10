@@ -1,6 +1,7 @@
 
 import logging
 import interactions
+from datetime import datetime
 from utils.db import DB
 from utils.chartCreator import ChartCreator
 
@@ -58,10 +59,13 @@ class StatsCreator():
         #Add Research Data
         statsFields += self._getResearchFields(playerId)
 
+        #Get Inactive start Time
+        activityStatus = self._getActiveStatus(playerStats)
+
         #Create Embed
         statsEmbed = interactions.Embed(
             title=f"{playerName}",
-            description= f"{playerId}\n{allianceName}",
+            description= f"{playerId}\n{allianceName}\n{activityStatus}",
             fields = statsFields,
             timestamp=playerStats[0][22],
             thumbnail=interactions.EmbedImageStruct(
@@ -107,6 +111,22 @@ class StatsCreator():
             ),
         ]
         return (statsEmbed, interactions.spread_to_rows(*statsComponents))
+
+    def _getActiveStatus(self, playerStats):
+        lastActiveTimestamp = None
+        for idx,stat in enumerate(playerStats[:-1]):
+            currentScore = stat[2]
+            nextScore = playerStats[idx+1][2]
+
+            if currentScore > nextScore:
+                lastActiveTimestamp = stat[-1]
+                break
+        
+        inactiveDays = (datetime.now()-lastActiveTimestamp).days
+        if inactiveDays <= 1:
+            return "*Aktive*"
+        else:
+            return f"*Inaktiv seit: {inactiveDays} Tagen*"
 
     def _getPlanetFields(self, playerId:str):
         planetData = self._db.getPlayerPlanets(playerId)
