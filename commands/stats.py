@@ -390,8 +390,8 @@ class Stats(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
         
-        await ctx.send()
         await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
+        await ctx.send()
 
     #Alliance Player Select 2
     @interactions.extension_component("allianceplayerselect2")
@@ -404,8 +404,8 @@ class Stats(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
         
-        await ctx.send()
         await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
+        await ctx.send()
 
     #Alliance Player Select 3
     @interactions.extension_component("allianceplayerselect3")
@@ -418,8 +418,8 @@ class Stats(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
         
-        await ctx.send()
         await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
+        await ctx.send()
 
     #Alliance Player Select 4
     @interactions.extension_component("allianceplayerselect4")
@@ -432,8 +432,8 @@ class Stats(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
         
-        await ctx.send()
         await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
+        await ctx.send()
 
     #Alliance Player Select 5
     @interactions.extension_component("allianceplayerselect5")
@@ -446,8 +446,8 @@ class Stats(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
         
-        await ctx.send()
         await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
+        await ctx.send()
 
     @interactions.extension_command(
         name="inactive",
@@ -609,7 +609,6 @@ class Stats(interactions.Extension):
         if not allianceData:
             return False
 
-        allAllianceData = self._db.getAllAllianceStats(allianceData[1])
         allianceUserData = self._db.getAllianceStats(allianceData[1])
         allianceUserData.sort(key=lambda a: a[3]) #sort by Rank
         
@@ -619,11 +618,6 @@ class Stats(interactions.Extension):
             description= f"Mitglieder: {len(allianceUserData)}",
             fields=self._getTopAlliancePlayerFields(allianceUserData),
             timestamp=allianceUserData[0][0],
-            thumbnail=interactions.EmbedImageStruct(
-                url=self._chartCreator.getAllianceUrl(allAllianceData,allianceData[2]),
-                height=720,
-                width=420
-            )
         )
 
         playerSelectMenus = self._getAlliancePlayerSelect(allianceUserData)
@@ -653,8 +647,8 @@ class Stats(interactions.Extension):
 
             selectOptions.append(
                 interactions.SelectOption(
-                    label=user[27],
-                    value=user[27],
+                    label=user[28],
+                    value=user[28],
                 )
             )
         
