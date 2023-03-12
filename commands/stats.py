@@ -108,10 +108,10 @@ class Stats(interactions.Extension):
         allianceName = ctx.message.embeds[0].description.split('\n')[1]
         allianceEmbed,allianceComponent = self._getAllianceContent(allianceName)
 
-        #confirm modal
-        await ctx.send()
         #edit original message
         await ctx.message.edit(embeds=allianceEmbed,components=interactions.spread_to_rows(*allianceComponent))
+        #confirm modal
+        await ctx.send("")
 
     #Planet Modal
     @interactions.extension_component("btn_planet")
@@ -696,7 +696,7 @@ class Stats(interactions.Extension):
         ]
         
         for player in allianceData[:10]:
-            top10Fields[0].value += player[27] + "\n"
+            top10Fields[0].value += player[28] + "\n"
             top10Fields[1].value += self._statsCreator.formatNumber(player[3]) + "\n"
             top10Fields[2].value += self._statsCreator.formatNumber(player[4]) + "\n"
         
