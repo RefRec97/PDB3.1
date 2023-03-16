@@ -200,13 +200,19 @@ class StatsCreator():
 
 
         if enemyMoon:
-            result +=  f":exclamation:"
+            result +=  f":exclamation:\u2003"
+        else:
+            result +=  f":grey_exclamation:\u2003"
         
         if friendlyMoon:
-            result += ":green_heart:"
-        
+            result += ":green_heart:\u2003"
+        else:
+            result += ":white_heart:\u2003"
+
         if planet[7] and planet[7] >=0:
-            result+= ":o:"
+            result+= ":o:\u2003"
+        else:
+            result+= ":white_circle:\u2003"
         
         return result
 
