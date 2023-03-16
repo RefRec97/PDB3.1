@@ -143,7 +143,7 @@ class StatsCreator():
                 inline=True
             ),
             interactions.EmbedField(
-                name="Scannbar",
+                name="Sonstiges",
                 value="",
                 inline=True
             ),
@@ -167,7 +167,7 @@ class StatsCreator():
                 value = f"{planet[6]}  [{startSystem}-{endSystem}]"
             planetEmbeds[1].value += f"{value}\n"
 
-            # Friendly/enemy Moons
+            # Other Symbols
             planetEmbeds[2].value += f"{self._getOtherPlanetSymbols(planet, allMoons, friendlyPlayerIds)}\n"
         
         if not planetData:
@@ -179,8 +179,8 @@ class StatsCreator():
 
     def _getOtherPlanetSymbols(self, planet, allMoons, friendlyPlayerIds):
         result="-"
-        friendlyMoon = 0
-        enemyMoon = 0
+        friendlyMoon = False
+        enemyMoon = False
 
         for moon in allMoons:
             moonPlayerId = moon[0]
@@ -193,13 +193,21 @@ class StatsCreator():
 
             if self.isPlanetInSensorRange(moonSystem, moonPhalanx,planet[3]):
                 if moonPlayerId in friendlyPlayerIds:
-                    friendlyMoon+=1
+                    friendlyMoon = True
                 else:
-                    enemyMoon+=1
-        
-        if enemyMoon > 0 or friendlyMoon > 0:
-            result =  f":exclamation: {enemyMoon}\u2001\u2001:green_heart: {friendlyMoon}"
+                    enemyMoon = True
+        result = ""
 
+
+        if enemyMoon:
+            result +=  f":exclamation:"
+        
+        if friendlyMoon:
+            result += ":green_heart:"
+        
+        if planet[7] and planet[7] >=0:
+            result+= ":o:"
+        
         return result
 
     def _getPhalanxRange(self,planet):

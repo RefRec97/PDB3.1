@@ -47,68 +47,6 @@ class ChartCreator():
         self._logger.debug("Initialization")
 
         self._db:DB = db
-    
-    def getAllianceUrl(self, allianceData, allianceName):
-        
-        chartData = self._getAllianceChartData(allianceData)
-
-        types = [self.SCORE, self.BUILDINGSCORE, self.RESEARCHSCORE, self.FLEETSCORE, 
-            self.DEFENSIVESCORE]
-
-        return self._createChartUrl(chartData, allianceName, types)
-
-    def _getAllianceChartData(self, allianceData):
-        
-        chartData= {
-            "rank": [],
-            "score": [],
-            "researchRank": [],
-            "researchScore": [],
-            "buildingRank": [],
-            "buildingScore": [],
-            "defensiveRank": [],
-            "defensiveScore": [],
-            "fleetRank": [],
-            "fleetScore": [],
-            "battlesWon": [],
-            "battlesLost": [],
-            "battlesDraw": [],
-            "debrisMetal": [],
-            "debrisCrystal": [],
-            "unitsDestroyed": [],
-            "unitsLost": [],
-            "realDebrisMetal": [],
-            "realDebrisCrystal": [],
-            "realUnitsDestroyed": [],
-            "realUnitsLost":[],
-            "labels": []
-        }
-
-        currentDay = -1
-        currentHour = -1
-        idx = -1
-        for datapoint in allianceData:
-            timestamp:datetime.datetime = datapoint[7]
-
-            if not (currentDay == timestamp.day and currentHour == timestamp.hour ):
-                currentDay = timestamp.day
-                currentHour = timestamp.hour
-                idx+=1
-                chartData["score"].append(0)
-                chartData["researchScore"].append(0)
-                chartData["buildingScore"].append(0)
-                chartData["defensiveScore"].append(0)
-                chartData["fleetScore"].append(0)
-                chartData["labels"].append(datetime.datetime.strftime(datapoint[-1], "%H-%d.%m.%Y"))
-            
-            chartData["score"][idx] += datapoint[2]
-            chartData["researchScore"][idx] += datapoint[3]
-            chartData["buildingScore"][idx] += datapoint[4]
-            chartData["defensiveScore"][idx] += datapoint[5]
-            chartData["fleetScore"][idx] += datapoint[6]
-            
-
-        return chartData
 
     def _getChartData(self, userData:list):
         

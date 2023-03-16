@@ -183,6 +183,7 @@ class DB():
             "position",
             MOON,
             "sensorPhalanx",
+            "jumpgate",
             "timestamp"
         FROM PUBLIC.PLANET
         WHERE planet."playerId" = %s"""
@@ -343,6 +344,7 @@ class DB():
             position,
             MOON,
             "sensorPhalanx",
+            "jumpgate",
             "timestamp"
         FROM PUBLIC.PLANET
         WHERE planet."galaxy" = %s
@@ -486,3 +488,14 @@ class DB():
                 AND PLANET."position" = %s;"""
         
         self._write(sql,(sensor, playerId, galaxy, system, position, ))
+    
+    def setJumpGate(self, playerId:str, galaxy:int, system:int, position:int, jumpGate:int):
+        sql = """UPDATE PUBLIC."planet"
+            SET "jumpgate" = %s,
+                "timestamp" = now()
+            WHERE PLANET."playerId" = %s
+                AND PLANET."galaxy" = %s
+                AND PLANET."system" = %s 
+                AND PLANET."position" = %s;"""
+        
+        self._write(sql,(jumpGate, playerId, galaxy, system, position, ))

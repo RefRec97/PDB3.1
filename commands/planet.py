@@ -357,6 +357,87 @@ class Planet(interactions.Extension):
 
         #No planet/moon found
         await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+    
+    @interactions.extension_command(
+        name="jumpgate",
+        description="Setzt das Sprungor Level auf einem Mond",
+        options = [
+            interactions.Option(
+                name="username",
+                description="Pr0game Username",
+                type=interactions.OptionType.STRING,
+                required=True
+            ),
+            interactions.Option(
+                name="galaxy",
+                description="Galaxy",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            ),
+            interactions.Option(
+                name="system",
+                description="System",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            ),
+            interactions.Option(
+                name="position",
+                description="Position",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            ),
+            interactions.Option(
+                name="level",
+                description="Sprungtor Level",
+                type=interactions.OptionType.INTEGER,
+                required=True
+            )
+        ]
+    )
+    @interactions.autodefer(delay=5)
+    async def jumpgate(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
+        self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
+        self._logger.debug("Arguments: %s", str((galaxy,system,position)))
+
+        if not self._auth.check(ctx.user.id, "moon"):
+            await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
+            return
+        
+        try:
+            self._checkValidPosition(galaxy,system,position)
+        except ValueError as err:
+            self._logger.debug(err)
+            await ctx.send(str(err), ephemeral=True)
+            return
+
+        playerData = self._db.getPlayerDataByName(username)
+        if not playerData:
+            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+            return
+
+        #check if planet exist
+        userPlanets = self._db.getPlayerPlanets(playerData[1])
+
+        for planet in userPlanets:
+            if (planet[2] == galaxy and 
+                planet[3] == system and 
+                planet[4] == position and
+                planet[5]):
+                
+                self._db.setJumpGate(playerData[1],galaxy,system,position,level)
+                
+                await ctx.send("Working...")
+                try:
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+                except ValueError as err:
+                    self._logger.debug(err)
+                    await ctx.send(str(err), ephemeral=True)
+                    return
+                await ctx.edit("",embeds=statsEmbed, components=statsComponent)
+                return
+
+        #No planet/moon found
+        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
 
     @interactions.extension_command(
         name="in_range",
@@ -580,7 +661,8 @@ class Planet(interactions.Extension):
             "406": "plas",
             "407": "klsk",
             "408": "grsk",
-            "42": "sensor"
+            "42": "sensor",
+            "43": "jumpgate"
         }
 
         idx = 0
@@ -624,10 +706,15 @@ class Planet(interactions.Extension):
 
             #Update Sensor Phalanx
             planet = self._db.getPlanet(result["gal"],result["sys"],result["pos"])
-            if planet[7] < result["timestamp"]:
+            if planet[8] < result["timestamp"]:
                 if result["sensor"] is not None:
                     await self._notify.checkSensor(planet,int(result["sensor"]))
                     self._db.setSensor(planet[1],result["gal"],result["sys"],result["pos"],int(result["sensor"]))
+
+            #Update Jump Gate
+            if planet[8] < result["timestamp"]:
+                if result["jumpgate"] is not None:
+                    self._db.setJumpGate(planet[1],result["gal"],result["sys"],result["pos"],int(result["jumpgate"]))
         
             #Update Research
             #only if all research is found
