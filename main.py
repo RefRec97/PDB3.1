@@ -7,6 +7,7 @@ from utils.update import Update
 from utils.chartCreator import ChartCreator
 from utils.statsCreator import StatsCreator
 from utils.notify import Notify
+from utils.playerResolve import PlayerResolve
 import config
 
 
@@ -24,10 +25,11 @@ def main():
     logger.info("Startup")
     
     #Create Bot
-    client = interactions.Client(token=config.prodToken)
+    client = interactions.Client(token=config.devToken)
 
     #Utils
     db = DB(prod = True)
+    playerResolve = PlayerResolve(db)
     notify = Notify(client, db)
     update = Update(db, notify)
     authroization = Authorization(db)
@@ -37,9 +39,9 @@ def main():
     #Load Commands
     client.load("commands.utils", args=(authroization, update, notify, db))
     client.load("commands.auth", args=(authroization))
-    client.load("commands.stats", args=(authroization, db, statsCreator, chartCreator))
-    client.load("commands.planet", args=(authroization, db, statsCreator, notify))
-    client.load("commands.chart", args=(authroization, db, chartCreator))
+    client.load("commands.stats", args=(authroization, db, statsCreator, chartCreator, playerResolve))
+    client.load("commands.planet", args=(authroization, db, statsCreator, notify, playerResolve))
+    client.load("commands.chart", args=(authroization, db, chartCreator, playerResolve))
     client.load("commands.manageNotify", args=(authroization, db))
 
     #Start Bot

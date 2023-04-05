@@ -44,7 +44,6 @@ class ManageNotify(interactions.Extension):
                 description="Kategorie",
                 required=True,
                 choices=[
-                    interactions.Choice(name="Expo cap increase", value=Notify.EXPO_SIZE),
                     interactions.Choice(name="Sensor Phalanx reichweite", value=Notify.SENSOR_PHALANX)
                 ]
             ),

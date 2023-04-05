@@ -8,6 +8,7 @@ from utils.authorisation import Authorization
 from utils.db import DB
 from utils.statsCreator import StatsCreator
 from utils.notify import Notify
+from utils.playerResolve import PlayerResolve
 
 
 class Planet(interactions.Extension):
@@ -20,14 +21,15 @@ class Planet(interactions.Extension):
         self._db:DB = args[1]
         self._statsCreator:StatsCreator = args[2]
         self._notify:Notify = args[3]
+        self._playerResolve: PlayerResolve =args[4]
     
     @interactions.extension_command(
         name="planet",
         description="Speichert ein Planet",
         options = [
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
@@ -52,7 +54,7 @@ class Planet(interactions.Extension):
         ],
     )
     @interactions.autodefer(delay=5)
-    async def planet(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
+    async def planet(self, ctx: interactions.CommandContext, input:str, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
@@ -63,17 +65,18 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        playerData = self._db.getPlayerDataByName(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+        playerId = self._playerResolve.getPlayerId(input)
+        if not playerId:
+            await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
             return
 
+        playerData = self._db.getPlayerDataById(playerId)
         #save planet
         self._db.updatePlanet(galaxy,system,position,playerData[1])
         
         await ctx.send("Working...")
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId)
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -131,8 +134,8 @@ class Planet(interactions.Extension):
         description="Speichert ein Mond",
         options = [
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
@@ -157,7 +160,7 @@ class Planet(interactions.Extension):
         ],
     )
     @interactions.autodefer(delay=5)
-    async def moon(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
+    async def moon(self, ctx: interactions.CommandContext, input:str, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
@@ -172,12 +175,12 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        #get userId
-        playerData = self._db.getPlayerDataByName(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+        playerId = self._playerResolve.getPlayerId(input)
+        if not playerId:
+            await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
             return
 
+        playerData = self._db.getPlayerDataById(playerId)
         #check if planet exist
         userPlanets = self._db.getPlayerPlanets(playerData[1])
 
@@ -190,7 +193,7 @@ class Planet(interactions.Extension):
 
                 await ctx.send("Working...")
                 try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
@@ -199,7 +202,7 @@ class Planet(interactions.Extension):
                 return
 
         #No planet found
-        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        await ctx.edit(f"Planet für Spieler nicht gefunden", ephemeral=True)
 
     
     @interactions.extension_command(
@@ -207,8 +210,8 @@ class Planet(interactions.Extension):
         description="Speichert ein Mond",
         options = [
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
@@ -233,7 +236,7 @@ class Planet(interactions.Extension):
         ],
     )
     @interactions.autodefer(delay=5)
-    async def delMoon(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int):
+    async def delMoon(self, ctx: interactions.CommandContext, input:str, galaxy:int, system:int, position: int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
@@ -248,11 +251,12 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        playerData = self._db.getPlayerDataByName(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+        playerId = self._playerResolve.getPlayerId(input)
+        if not playerId:
+            await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
             return
 
+        playerData = self._db.getPlayerDataById(playerId)
         #check if planet exist
         userPlanets = self._db.getPlayerPlanets(playerData[1])
 
@@ -265,7 +269,7 @@ class Planet(interactions.Extension):
                 self._db.setMoon(playerData[1],galaxy,system,position,False)
                 await ctx.send("Working...")
                 try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
@@ -274,15 +278,15 @@ class Planet(interactions.Extension):
                 return
 
         #No planet found
-        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        await ctx.edit(f"Planet für Spieler nicht gefunden", ephemeral=True)
 
     @interactions.extension_command(
         name="phalanx",
         description="Setzt das Sensor Phalanx Level auf einem Mond",
         options = [
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
@@ -313,7 +317,7 @@ class Planet(interactions.Extension):
         ]
     )
     @interactions.autodefer(delay=5)
-    async def phalanx(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
+    async def phalanx(self, ctx: interactions.CommandContext, input:str, galaxy:int, system:int, position: int, level:int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
@@ -328,11 +332,12 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        playerData = self._db.getPlayerDataByName(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+        playerId = self._playerResolve.getPlayerId(input)
+        if not playerId:
+            await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
             return
 
+        playerData = self._db.getPlayerDataById(playerId)
         #check if planet exist
         userPlanets = self._db.getPlayerPlanets(playerData[1])
 
@@ -347,7 +352,7 @@ class Planet(interactions.Extension):
                 
                 await ctx.send("Working...")
                 try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
@@ -356,15 +361,15 @@ class Planet(interactions.Extension):
                 return
 
         #No planet/moon found
-        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        await ctx.edit(f"Planet für Spieler nicht gefunden", ephemeral=True)
     
     @interactions.extension_command(
         name="jumpgate",
         description="Setzt das Sprungor Level auf einem Mond",
         options = [
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
@@ -395,7 +400,7 @@ class Planet(interactions.Extension):
         ]
     )
     @interactions.autodefer(delay=5)
-    async def jumpgate(self, ctx: interactions.CommandContext, username:str, galaxy:int, system:int, position: int, level:int):
+    async def jumpgate(self, ctx: interactions.CommandContext, input:str, galaxy:int, system:int, position: int, level:int):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Arguments: %s", str((galaxy,system,position)))
 
@@ -410,11 +415,12 @@ class Planet(interactions.Extension):
             await ctx.send(str(err), ephemeral=True)
             return
 
-        playerData = self._db.getPlayerDataByName(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+        playerId = self._playerResolve.getPlayerId(input)
+        if not playerId:
+            await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
             return
 
+        playerData = self._db.getPlayerDataById(playerId)
         #check if planet exist
         userPlanets = self._db.getPlayerPlanets(playerData[1])
 
@@ -428,7 +434,7 @@ class Planet(interactions.Extension):
                 
                 await ctx.send("Working...")
                 try:
-                    statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+                    statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId)
                 except ValueError as err:
                     self._logger.debug(err)
                     await ctx.send(str(err), ephemeral=True)
@@ -437,7 +443,7 @@ class Planet(interactions.Extension):
                 return
 
         #No planet/moon found
-        await ctx.edit(f"Planet für Spieler nicht gefunden: {username}", ephemeral=True)
+        await ctx.edit(f"Planet für Spieler nicht gefunden", ephemeral=True)
 
     @interactions.extension_command(
         name="in_range",

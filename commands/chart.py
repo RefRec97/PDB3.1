@@ -3,6 +3,7 @@ import logging
 from utils.authorisation import Authorization
 from utils.db import DB
 from utils.chartCreator import ChartCreator
+from utils.playerResolve import PlayerResolve
 
 class Chart(interactions.Extension):
 
@@ -38,32 +39,34 @@ class Chart(interactions.Extension):
         self._auth:Authorization = args[0]
         self._db:DB = args[1]
         self._chartCreator:ChartCreator = args[2]
+        self._playerResolve: PlayerResolve =args[3]
     
     @interactions.extension_command(
         name="chart",
         description="Chart des Spielers",
         options = [
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
         ]
     )
-    async def chart(self, ctx: interactions.CommandContext, username:str = None):
+    async def chart(self, ctx: interactions.CommandContext, input:str = None):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
-        self._logger.debug("Username: %s", username)
+        self._logger.debug("Username: %s", input)
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        playerData = self._db.getPlayerDataByName(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+        playerId = self._playerResolve.getPlayerId(input)
+        if not playerId:
+            await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
             return False
-
+        
+        playerData = self._db.getPlayerDataById(playerId)
         playerStats = self._db.getPlayerStats(playerData[1])
         chartUrl = self._chartCreator.getChartUrl(playerStats, playerData[2],
                         [
@@ -90,7 +93,7 @@ class Chart(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        playerId = self._db.getLink(str(ctx.user.id))
+        playerId = self._db.getLinkByDiscordId(str(ctx.user.id))
         if not playerId:
             await ctx.send(f"Verlinkung nicht gefunden. Bitte verlinke zuerst dein Discord mit Pr0game durch /link", ephemeral=True)
             return
@@ -119,8 +122,8 @@ class Chart(interactions.Extension):
         description="Custom chart des Spielers",
         options =[
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
@@ -182,20 +185,21 @@ class Chart(interactions.Extension):
             ),
         ],
     )
-    async def customChart(self, ctx: interactions.CommandContext, username:str, type_1:str, type_2:str=None,
+    async def customChart(self, ctx: interactions.CommandContext, input:str, type_1:str, type_2:str=None,
                             type_3:str=None, type_4:str=None, type_5:str=None, type_6:str=None, type_7:str=None, type_8:str=None):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
-        self._logger.debug("Username: %s", username)
+        self._logger.debug("Username: %s", input)
         
         if not self._auth.check(ctx.user.id, "chart"):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        playerData = self._db.getPlayerDataByName(username)
-        if not playerData:
-            await ctx.send(f"Spieler nicht gefunden: {username}", ephemeral=True)
+        playerId = self._playerResolve.getPlayerId(input)
+        if not playerId:
+            await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
             return
         
+        playerData = self._db.getPlayerDataById(playerId)
         playerStats = self._db.getPlayerStats(playerData[1])
 
         rawTypes = [type_1,type_2,type_3,type_4,type_5,type_6,type_7,type_8]
@@ -216,57 +220,57 @@ class Chart(interactions.Extension):
                 choices=_customChartChoices,
             ),
             interactions.Option(
-                name="username1",
-                description="Pr0game Username1",
+                name="input1",
+                description="1. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
             interactions.Option(
-                name="username2",
-                description="Pr0game Username2",
+                name="input2",
+                description="2. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
             interactions.Option(
-                name="username3",
-                description="Pr0game Username3",
+                name="input3",
+                description="3. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=False
             ),
             interactions.Option(
-                name="username4",
-                description="Pr0game Username4",
+                name="input4",
+                description="4. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=False
             ),
             interactions.Option(
-                name="username5",
-                description="Pr0game Username5",
+                name="input5",
+                description="5. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=False
             ),
             interactions.Option(
-                name="username6",
-                description="Pr0game Username6",
+                name="input6",
+                description="6. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=False
             ),
             interactions.Option(
-                name="username7",
-                description="Pr0game Username7",
+                name="input7",
+                description="7. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=False
             ),
             interactions.Option(
-                name="username8",
-                description="Pr0game Username8",
+                name="input8",
+                description="8. Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=False
             )
         ],
     )
-    async def compareChart(self, ctx: interactions.CommandContext, type:str, username1:str, username2:str,
-                           username3:str=None, username4:str=None, username5:str=None, username6:str=None, username7:str=None, username8:str=None):
+    async def compareChart(self, ctx: interactions.CommandContext, type:str, input1:str, input2:str,
+                           input3:str=None, input4:str=None, input5:str=None, input6:str=None, input7:str=None, input8:str=None):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
         self._logger.debug("Command called: %s from %s",ctx.command.name, ctx.user.username)
 
@@ -274,24 +278,24 @@ class Chart(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
 
-        rawNames = [username1,username2,username3,username4,username5,username6,username7,username8]
+        rawInputs = [input1,input2,input3,input4,input5,input6,input7,input8]
         #remove NONE from names
-        names = [element for element in rawNames if element is not None]
+        names = [element for element in rawInputs if element is not None]
 
         allPlayerStats = []
         allPlayerNames = []
-        for playerName in names:
-            playerData = self._db.getPlayerDataByName(playerName)
-            
-            if not playerData:
-                await ctx.send(f"Spieler nicht gefunden: {playerName}", ephemeral=True)
+        for input in names:
+            playerId = self._playerResolve.getPlayerId(input)
+            if not playerId:
+                await ctx.send(f"Spieler nicht gefunden: {input}", ephemeral=True)
                 return
+
+            playerData = self._db.getPlayerDataById(playerId)
             allPlayerStats.append(self._db.getPlayerStats(playerData[1]))
             allPlayerNames.append(playerData[2]) #to keep get original upper-/lowercase letters
         
 
         await ctx.send(self._chartCreator.getCompareChart(allPlayerStats,allPlayerNames,type))
-    
 
 def setup(client, args):
     Chart(client, args)

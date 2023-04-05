@@ -4,6 +4,7 @@ from utils.authorisation import Authorization
 from utils.db import DB
 from utils.statsCreator import StatsCreator
 from utils.chartCreator import ChartCreator
+from utils.playerResolve import PlayerResolve
 
 class Stats(interactions.Extension):
     def __init__(self, client, args):
@@ -15,6 +16,7 @@ class Stats(interactions.Extension):
         self._db:DB = args[1]
         self._statsCreator:StatsCreator = args[2]
         self._chartCreator:ChartCreator = args[3]
+        self._playerResolve: PlayerResolve =args[4]
         
     
     @interactions.extension_command(
@@ -22,16 +24,16 @@ class Stats(interactions.Extension):
         description="Stats des Spielers",
         options = [
             interactions.Option(
-                name="username",
-                description="Pr0game Username",
+                name="input",
+                description="Player ID, Discrod Name oder pr0ganme Username",
                 type=interactions.OptionType.STRING,
                 required=True
             ),
         ],
     )
-    async def stats(self, ctx: interactions.CommandContext, username:str = None):
+    async def stats(self, ctx: interactions.CommandContext, input:str = None):
         self._logger.info(f"{ctx.user.username}, {ctx.command.name}")
-        self._logger.debug("Username: %s", username)
+        self._logger.debug("Username: %s", input)
 
         if not self._auth.check(ctx.user.id, ctx.command.name):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
@@ -39,7 +41,8 @@ class Stats(interactions.Extension):
         
         await ctx.send("Working...",embeds=None)
         try:
-            statsEmbed,statsComponent = self._statsCreator.getStatsContentByName(username)
+            playerId = self._playerResolve.getPlayerId(input)
+            statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId)
         except ValueError as err:
             self._logger.debug(err)
             await ctx.send(str(err), ephemeral=True)
@@ -59,7 +62,7 @@ class Stats(interactions.Extension):
             await ctx.send(embeds=self._auth.NOT_AUTHORIZED_EMBED, ephemeral=True)
             return
         
-        playerId = self._db.getLink(str(ctx.user.id))
+        playerId = self._db.getLinkByDiscordId(str(ctx.user.id))
         if not playerId:
             await ctx.send(f"Verlinkung nicht gefunden. Bitte verlinke zuerst dein Discord mit Pr0game durch /link", ephemeral=True)
             return

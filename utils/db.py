@@ -363,11 +363,17 @@ class DB():
         
         return self._read(sql,())
 
-    def getLink(self, discordId):
+    def getLinkByDiscordId(self, discordId):
         sql = """SELECT "playerId" FROM PUBLIC.LINK
                 WHERE "discordId" = %s; """
         
         return self._readOne(sql,(discordId,))
+
+    def getLinkByName(self, discordName):
+        sql = """SELECT "playerId" FROM PUBLIC.LINK
+                WHERE lower("discordName") = lower(%s); """
+        
+        return self._readOne(sql,(discordName,))
 
     def setSpyReport(self, reportId, playerId, type, galaxy, system, position, metal, crystal, deuterium, kt, gt, lj ,sj ,xer, ss,
                      kolo, rec, spio, b, stats, z, rip, sxer, rak, ll, sl, gauss, ion, plas, klsk, grsk, simu):
