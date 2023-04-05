@@ -25,7 +25,7 @@ def main():
     logger.info("Startup")
     
     #Create Bot
-    client = interactions.Client(token=config.devToken)
+    client = interactions.Client(token=config.prodToken)
 
     #Utils
     db = DB(prod = True)
