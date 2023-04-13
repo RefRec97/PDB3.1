@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS bot.notify
     id text COLLATE pg_catalog."default",
     type character(1) COLLATE pg_catalog."default",
     "guildId" text COLLATE pg_catalog."default",
+    "playerId" integer,
     CONSTRAINT notify_pkey PRIMARY KEY ("dbKey"),
     CONSTRAINT id_type_unique UNIQUE (id, type)
 )

@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS bot.stats
     "unitsLost" bigint,
     "playerId" integer NOT NULL,
     "timestamp" timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    "realDebrisMetal" bigint,
+    "realDebrisCrystal" bigint,
+    "realUnitsDestroyed" bigint,
+    "realUnitsLost" bigint,
     CONSTRAINT stats_pkey PRIMARY KEY ("dbKey")
 )
 WITH (
