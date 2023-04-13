@@ -2,7 +2,7 @@
 
 -- DROP TABLE IF EXISTS public."authorization";
 
-CREATE TABLE IF NOT EXISTS public."authorization"
+CREATE TABLE IF NOT EXISTS bot."authorization"
 (
     "dbKey" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "userId" text COLLATE pg_catalog."default" NOT NULL,

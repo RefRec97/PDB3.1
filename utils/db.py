@@ -13,23 +13,26 @@ class DB():
         self._prod = prod
         self._connect()
 
-    def _connect(self):
-        if self._prod:
+    def _connect(self, schema="bot"):
+        if schema == "public":
             try:
-                self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword, port=config.pordDbPort)
-                self._logger.debug("DB connected")
+                self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword, port=config.pordDbPort, options="-c search_path=public")
+                #self._logger.debug("DB connected")
             except psycopg2.Error as e:
                 self._logger.critical("DB connection failed")
                 self._logger.critical(e)
         else:
             try:
-                self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword, port=config.devDbPort)
-                self._logger.debug("DB connected")
+                self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword, port=config.devDbPort, options="-c search_path=bot")
+                #self._logger.debug("DB connected")
             except psycopg2.Error as e:
                 self._logger.critical("DB connection failed")
                 self._logger.critical(e)
         
-        self._cur = self._conn.cursor()
+        #self._cur = self._conn.cursor()
+    def _disconenct(self):
+        self._conn.close()
+        #self._logger.debug("DB disconnected")
 
     def _read(self, sql, data=None):
         self._logger.debug("Read from Db")
@@ -102,7 +105,7 @@ class DB():
                 self._logger.critical(e)
 
     def _writePlayer(self, player:PlayerStats):
-        sql = """INSERT INTO public.player(
+        sql = """INSERT INTO bot.player(
             "playerId", "playerName", "playerUniverse", "playerGalaxy", "allianceId")
             VALUES (%s, %s, %s, %s, %s)
             on conflict ("playerId") DO UPDATE 
@@ -118,7 +121,7 @@ class DB():
             return
         self._savedAllianceData.append(player.allianceId)
 
-        sql = """INSERT INTO public.alliance(
+        sql = """INSERT INTO bot.alliance(
             "allianceId", "allianceName")
             VALUES (%s, %s)
             on conflict ("allianceId") DO UPDATE 
@@ -128,7 +131,7 @@ class DB():
         self._write(sql,(player.allianceId, player.allianceName))
 
     def _writeStats(self, player:PlayerStats):
-        sql = """INSERT INTO public.stats(
+        sql = """INSERT INTO bot.stats(
             "rank", "score", "researchRank", "researchScore", "buildingRank", "buildingScore",
             "defensiveRank", "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost",
             "battlesDraw", "debrisMetal", "debrisCrystal", "unitsDestroyed", "unitsLost", "playerId",
@@ -143,7 +146,7 @@ class DB():
             player.realUnitsLost))
 
     def getAuthRole(self, userID:str):
-        sql = """ SELECT "roleId" FROM public.authorization
+        sql = """ SELECT "roleId" FROM bot.authorization
             WHERE "userId" = %s;"""
 
         try:
@@ -156,7 +159,7 @@ class DB():
         sql = """SELECT "dbKey", rank, score, "researchRank", "researchScore", "buildingRank", "buildingScore", "defensiveRank",
             "defensiveScore", "fleetRank", "fleetScore", "battlesWon", "battlesLost", "battlesDraw", "debrisMetal", "debrisCrystal",
             "unitsDestroyed", "unitsLost", "playerId", "realDebrisMetal", "realDebrisCrystal", "realUnitsDestroyed", "timestamp"
-            FROM public.stats
+            FROM bot.stats
             where stats."playerId" = %s
             ORDER BY stats."timestamp" DESC
             LIMIT 300"""
@@ -164,13 +167,13 @@ class DB():
         return self._read(sql,(playerId,))
 
     def getAlliance(self, allianceName:str):
-        sql = """SELECT * from public."alliance"
+        sql = """SELECT * from bot."alliance"
             where lower(alliance."allianceName") = lower(%s);"""
 
         return self._readOne(sql,(allianceName,))
 
     def getAllianceById(self, allianceId:str):
-        sql = """SELECT * from public."alliance"
+        sql = """SELECT * from bot."alliance"
             where alliance."allianceId" = %s;"""
 
         return self._readOne(sql,(allianceId,))
@@ -185,25 +188,25 @@ class DB():
             "sensorPhalanx",
             "jumpgate",
             "timestamp"
-        FROM PUBLIC.PLANET
+        FROM bot.PLANET
         WHERE planet."playerId" = %s"""
 
         return self._read(sql,(playerId,))
 
     def getPlayerDataByName(self, userName:str):
-        sql = """ SELECT * FROM public.player
+        sql = """ SELECT * FROM bot.player
             WHERE lower(player."playerName")=lower(%s)"""
 
         return self._readOne(sql,(userName,))
 
     def getPlayerDataById(self, playerId:str):
-        sql = """ SELECT * FROM public.player
+        sql = """ SELECT * FROM bot.player
             WHERE player."playerId"=%s"""
 
         return self._readOne(sql,(playerId,))
     
     def updatePlanet(self, galaxy:int, system:int, position:int, playerId:str=-1):
-        sql = """INSERT INTO public.planet(
+        sql = """INSERT INTO bot.planet(
             "playerId", "galaxy", "system", "position")
             VALUES ( %s, %s, %s, %s)
             on conflict ("galaxy", "system", "position") DO UPDATE 
@@ -216,7 +219,7 @@ class DB():
         self._write(sql,(playerId, galaxy, system, position))
     
     def delNotify(self, id:str, type:str):
-        sql = """DELETE FROM public.notify
+        sql = """DELETE FROM bot.notify
             WHERE notify."id" = %s
             AND notify."type" = %s;"""
         
@@ -231,13 +234,13 @@ class DB():
             IMPULSE,
             HYPERSPACE,
             "timestamp"
-        FROM PUBLIC.RESEARCH
+        FROM bot.RESEARCH
 	    WHERE research."playerId" = %s"""
 
         return self._readOne(sql,(playerId,))
 
     def getAllianceStats(self, allianceID:str):
-        sql = """SELECT DISTINCT ON (player."playerId") stats."timestamp", player."playerId", * from public."stats"
+        sql = """SELECT DISTINCT ON (player."playerId") stats."timestamp", player."playerId", * from bot."stats"
             inner join player on player."playerId" = stats."playerId"
             where player."allianceId" = %s
             ORDER BY player."playerId", stats."timestamp" DESC"""
@@ -248,7 +251,7 @@ class DB():
         sql = """SELECT "playerId",
             "system",
             "sensorPhalanx"
-        FROM PUBLIC."planet"
+        FROM bot."planet"
         WHERE PLANET."galaxy" = %s
             AND "moon" = TRUE"""
 
@@ -259,14 +262,14 @@ class DB():
             "galaxy", 
             "system",
             "sensorPhalanx"
-        FROM PUBLIC."planet"
+        FROM bot."planet"
         WHERE "moon" = TRUE"""
 
         return self._read(sql,())
 
     def getAllianceMember(self, allianceId):
         sql = """SELECT "playerId"
-        FROM public.player
+        FROM bot.player
         WHERE "allianceId" = %s"""
 
         return self._read(sql,(allianceId,))
@@ -281,7 +284,7 @@ class DB():
                 STATS."defensiveScore",
                 STATS."fleetScore",
                 STATS."timestamp"
-            FROM PUBLIC."stats"
+            FROM bot."stats"
             INNER JOIN PLAYER ON PLAYER."playerId" = STATS."playerId"
             WHERE PLAYER."allianceId" = %s
             ORDER BY STATS."timestamp" ASC"""
@@ -295,7 +298,7 @@ class DB():
                 PLAYER."playerId",
                 SCORE,
                 STATS."timestamp"
-            FROM PUBLIC."stats"
+            FROM bot."stats"
             INNER JOIN PLAYER ON PLAYER."playerId" = STATS."playerId"
             WHERE stats."timestamp" > current_date - interval '2' day
             ORDER BY STATS."timestamp" DESC"""
@@ -310,8 +313,8 @@ class DB():
             PLANET."system",
             PLANET."position",
             PLANET."moon"
-        FROM PUBLIC."player"
-        INNER JOIN PUBLIC."planet" ON PLANET."playerId" = PLAYER."playerId"
+        FROM bot."player"
+        INNER JOIN bot."planet" ON PLANET."playerId" = PLAYER."playerId"
         WHERE PLAYER."allianceId" = %s"""
 
         return self._read(sql,(allianceId,))
@@ -320,7 +323,7 @@ class DB():
         sql = """SELECT "id",
             "type",
             "guildId"
-	        FROM public.notify
+	        FROM bot.notify
             WHERE notify."id" = %s
             AND notify."type" = %s;"""
 
@@ -331,7 +334,7 @@ class DB():
             "type",
             "guildId",
             "playerId"
-	        FROM public.notify
+	        FROM bot.notify
             WHERE notify."type" = %s;"""
 
         return self._read(sql,(type,))
@@ -346,7 +349,7 @@ class DB():
             "sensorPhalanx",
             "jumpgate",
             "timestamp"
-        FROM PUBLIC.PLANET
+        FROM bot.PLANET
         WHERE planet."galaxy" = %s
         AND planet."system" = %s
         AND planet."position" = %s"""
@@ -356,7 +359,7 @@ class DB():
 
     def getScoreForExpo(self):
         sql = """SELECT STATS."score"
-            FROM PUBLIC."stats"
+            FROM bot."stats"
             WHERE STATS."rank" = 1
             ORDER BY STATS."timestamp" DESC
             LIMIT 2"""
@@ -364,20 +367,20 @@ class DB():
         return self._read(sql,())
 
     def getLinkByDiscordId(self, discordId):
-        sql = """SELECT "playerId" FROM PUBLIC.LINK
+        sql = """SELECT "playerId" FROM bot.LINK
                 WHERE "discordId" = %s; """
         
         return self._readOne(sql,(discordId,))
 
     def getLinkByName(self, discordName):
-        sql = """SELECT "playerId" FROM PUBLIC.LINK
+        sql = """SELECT "playerId" FROM bot.LINK
                 WHERE lower("discordName") = lower(%s); """
         
         return self._readOne(sql,(discordName,))
 
     def setSpyReport(self, reportId, playerId, type, galaxy, system, position, metal, crystal, deuterium, kt, gt, lj ,sj ,xer, ss,
                      kolo, rec, spio, b, stats, z, rip, sxer, rak, ll, sl, gauss, ion, plas, klsk, grsk, simu):
-        sql = """INSERT INTO PUBLIC.SPYREPORT("reportId",
+        sql = """INSERT INTO bot.SPYREPORT("reportId",
             "playerId",
             TYPE,
             GALAXY,
@@ -415,14 +418,14 @@ class DB():
                          kolo, rec, spio, b, stats, z, rip, sxer, rak, ll, sl, gauss, ion, plas, klsk, grsk, simu))
 
     def setNotify(self, channelId:str, type:str, guildID:str=None, playerId:str=None):
-        sql = """INSERT INTO public.notify(
+        sql = """INSERT INTO bot.notify(
             "id", "type", "guildId", "playerId")
             VALUES (%s,%s,%s,%s);"""
 
         self._write(sql,(channelId,type,guildID, playerId))
     
     def setLink(self, playerId:str, discorId:str, discordName:str):
-        sql = """INSERT INTO public.link(
+        sql = """INSERT INTO bot.link(
             "playerId", "discordId", "discordName")
             VALUES (%s, %s, %s)
             on conflict ("discordId") DO UPDATE 
@@ -434,7 +437,7 @@ class DB():
         self._write(sql,(playerId,discorId,discordName))
 
     def setResearchAttack(self, playerId:str, weapon:int, shield:int, armor:int):
-        sql = """ INSERT INTO public.research(
+        sql = """ INSERT INTO bot.research(
             "playerId", "weapon", "shield", "armor")
             VALUES (%s, %s, %s, %s)
             on conflict ("playerId") DO UPDATE 
@@ -445,7 +448,7 @@ class DB():
         self._write(sql,(playerId, weapon, shield, armor))
     
     def setResearchDrive(self, playerId:str, combustion:int, impulse:int, hyperspace:int):
-        sql = """ INSERT INTO public.research(
+        sql = """ INSERT INTO bot.research(
             "playerId","combustion", "impulse", "hyperspace")
             VALUES (%s, %s, %s, %s)
             on conflict ("playerId") DO UPDATE 
@@ -467,7 +470,7 @@ class DB():
         self._logger.debug("Complete Player write complete count: %s",len(players))
     
     def setAuthorization(self, userId:str , role:int, username:str):
-        sql = """INSERT INTO public.authorization(
+        sql = """INSERT INTO bot.authorization(
             "userId", "roleId", "username")
             VALUES (%s, %s, %s) ON CONFLICT ("userId") DO UPDATE
                 SET "roleId" = excluded."roleId";"""
@@ -475,7 +478,7 @@ class DB():
         self._write(sql,(userId, role, username))
     
     def setMoon(self, playerId:str, galaxy:int, system:int, position:int, moon:bool):
-        sql = """UPDATE PUBLIC."planet"
+        sql = """UPDATE bot."planet"
             SET MOON = %s
             WHERE PLANET."playerId" = %s
                 AND PLANET."galaxy" = %s
@@ -485,7 +488,7 @@ class DB():
         self._write(sql,(moon, playerId, galaxy, system, position, ))
     
     def setSensor(self, playerId:str, galaxy:int, system:int, position:int, sensor:int):
-        sql = """UPDATE PUBLIC."planet"
+        sql = """UPDATE bot."planet"
             SET "sensorPhalanx" = %s,
                 "timestamp" = now()
             WHERE PLANET."playerId" = %s
@@ -496,7 +499,7 @@ class DB():
         self._write(sql,(sensor, playerId, galaxy, system, position, ))
     
     def setJumpGate(self, playerId:str, galaxy:int, system:int, position:int, jumpGate:int):
-        sql = """UPDATE PUBLIC."planet"
+        sql = """UPDATE bot."planet"
             SET "jumpgate" = %s,
                 "timestamp" = now()
             WHERE PLANET."playerId" = %s

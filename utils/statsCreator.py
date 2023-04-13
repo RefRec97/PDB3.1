@@ -151,9 +151,7 @@ class StatsCreator():
 
         allMoons = self._db.getAllMoons()
         friendlyPlayerIds = []
-        for entry in self._db.getAllianceMember(326): #Allianz mit Poll
-            friendlyPlayerIds.append(entry[0])
-        for entry in self._db.getAllianceMember(401): #Space Schmuser
+        for entry in self._db.getAllianceMember(416): #gurke
             friendlyPlayerIds.append(entry[0])
         planetData.sort(key=lambda element: (element[2], element[3], element[4]))
         for planet in planetData:
