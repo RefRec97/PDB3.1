@@ -13,26 +13,26 @@ class DB():
         self._prod = prod
         self._connect()
 
-    def _connect(self, schema="bot"):
-        if schema == "public":
+    def _connect(self):
+        if self._prod:
             try:
-                self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword, port=config.pordDbPort, options="-c search_path=public")
-                #self._logger.debug("DB connected")
+                self._conn = psycopg2.connect(host=config.prodDbHost, database=config.prodDatabase, user=config.podDbUser, password=config.prodDbPassword, port=config.pordDbPort)
+                self._logger.debug("DB connected")
             except psycopg2.Error as e:
                 self._logger.critical("DB connection failed")
                 self._logger.critical(e)
         else:
             try:
-                self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword, port=config.devDbPort, options="-c search_path=bot")
-                #self._logger.debug("DB connected")
+                self._conn = psycopg2.connect(host=config.devDbHost, database=config.devDatabase, user=config.devDbUser, password=config.devDbPassword, port=config.devDbPort)
+                self._logger.debug("DB connected")
             except psycopg2.Error as e:
                 self._logger.critical("DB connection failed")
                 self._logger.critical(e)
         
-        #self._cur = self._conn.cursor()
+        self._cur = self._conn.cursor()
     def _disconenct(self):
         self._conn.close()
-        #self._logger.debug("DB disconnected")
+        self._logger.debug("DB disconnected")
 
     def _read(self, sql, data=None):
         self._logger.debug("Read from Db")
