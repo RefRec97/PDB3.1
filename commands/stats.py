@@ -451,7 +451,7 @@ class Stats(interactions.Extension):
         
         await ctx.message.edit(embeds=statsEmbed, components=statsComponent)
         await ctx.send()
-"""
+    """
     @interactions.extension_command(
         name="inactive",
         description="Potentiell inaktive Spieler",
@@ -526,7 +526,7 @@ class Stats(interactions.Extension):
         embed = self._getInactiveEmbed(resultData, galaxy, lower_system, upper_system, point_limit)
 
         await ctx.edit(embeds=embed)
-"""
+    """
     def _getInactiveEmbed(self, planetData, galaxy:int, lowerSystem:int, upperSystem:int, lowerLimit:int):
         planetData.sort(key=lambda element: (element["system"], element["position"]))
 
