@@ -209,7 +209,7 @@ class ChartCreator():
                 qc.config["data"]["datasets"].append({
                     "yAxisID": "lowAxis",
                     "label": userName,
-                    "data": user["buildinghRank"],
+                    "data": user["buildingRank"],
                     "fill": False}
                 )
             elif type == self.BUILDINGSCORE:
@@ -394,7 +394,7 @@ class ChartCreator():
                 qc.config["data"]["datasets"].append({
                     "yAxisID": "lowAxis",
                     "label": "Gebäuderang",
-                    "data": chartData["buildinghRank"],
+                    "data": chartData["buildingRank"],
                     "fill": False,
                     "pointRadius": 1}
                 )
