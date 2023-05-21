@@ -190,7 +190,7 @@ class Planet(interactions.Extension):
                 planet[4] == position):
 
                 self._db.setMoon(playerData[1],galaxy,system,position,True)
-
+                self._db.setSensor(playerData[1],galaxy,system,position,0)
                 await ctx.send("Working...")
                 try:
                     statsEmbed,statsComponent = self._statsCreator.getStatsContentById(playerId)
